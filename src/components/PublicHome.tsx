@@ -10,7 +10,7 @@ function PublicHome() {
 
   return (
     <>
-    <HeroSection/>
+    <HeroSection onAuthRequired={()=> setAuthOpen(true)}/>
     <VehicleSlider/>
     <AuthModal open={authOpen} onClose={()=>setAuthOpen(false)}/>
     </>
