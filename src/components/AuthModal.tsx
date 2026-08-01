@@ -1,8 +1,10 @@
 "use client";
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Lock, Mail, User, X } from "lucide-react";
+import { CircleDashed, Lock, Mail, User, X } from "lucide-react";
 import Image from "next/image";
+import axios from "axios";
+import { signIn, useSession } from "next-auth/react";
 
 interface propType {
   open: boolean;
@@ -12,6 +14,44 @@ type stepType = "login" | "signup" | "otp";
 
 function AuthModal({ open, onClose }: propType) {
   const [step, setStep] = useState<stepType>("login");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
+
+  const {data} = useSession();
+  console.log("data",data);
+  const handleSignUp = async () => {
+    setLoading(true);
+    try {
+      const data = await axios.post("/api/auth/register", {
+        name,
+        email,
+        password,
+      });
+      console.log(data);
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      setErr(
+        error.response.data.message
+          ? error.response.data.message
+          : "Something went wrong",
+      );
+    }
+  };
+
+  const handleLogin = async () => {
+    setLoading(true);
+  const res = await  signIn("credentials", {
+      email,
+      password,
+      redirect:false
+    });
+    setLoading(false);
+    console.log(res);
+  };
   return (
     <>
       <AnimatePresence>
@@ -73,6 +113,8 @@ function AuthModal({ open, onClose }: propType) {
                             type="email"
                             placeholder="Email"
                             className="text-gray-500"
+                            onChange={(e) => setEmail(e.target.value)}
+                            value={email}
                           />
                         </div>
                         <div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
@@ -81,10 +123,24 @@ function AuthModal({ open, onClose }: propType) {
                             type="password"
                             placeholder="Password"
                             className="text-gray-500"
+                            onChange={(e) => setPassword(e.target.value)}
+                            value={password}
                           />
                         </div>
-                        <button className="w-full h-11 rounded-xl bg-black text-white font semibold hover:bg-gray-900 transition">
-                          Login
+                        <button
+                          onClick={handleLogin}
+                          disabled={loading}
+                          className="w-full h-11 flex justify-center items-center rounded-xl bg-black text-white font semibold hover:bg-gray-900 transition"
+                        >
+                          {loading ? (
+                            <CircleDashed
+                              size={18}
+                              color="white"
+                              className="animate-spin"
+                            />
+                          ) : (
+                            "Login"
+                          )}
                         </button>
                       </div>
                       <p className="mt-6 text-center text-sm text-gray-500">
@@ -112,6 +168,8 @@ function AuthModal({ open, onClose }: propType) {
                             type="text"
                             placeholder="Full Name"
                             className="text-gray-500"
+                            onChange={(e) => setName(e.target.value)}
+                            value={name}
                           />
                         </div>
                         <div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
@@ -120,6 +178,8 @@ function AuthModal({ open, onClose }: propType) {
                             type="email"
                             placeholder="Email"
                             className="text-gray-500"
+                            onChange={(e) => setEmail(e.target.value)}
+                            value={email}
                           />
                         </div>
                         <div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
@@ -128,10 +188,28 @@ function AuthModal({ open, onClose }: propType) {
                             type="password"
                             placeholder="Password"
                             className="text-gray-500"
+                            onChange={(e) => setPassword(e.target.value)}
+                            value={password}
                           />
                         </div>
-                        <button className="w-full h-11 rounded-xl bg-black text-white font semibold hover:bg-gray-900 transition">
-                          sign up
+
+                        {err && (
+                          <p className=" text-red-500 capitalize">{err}!</p>
+                        )}
+                        <button
+                          onClick={handleSignUp}
+                          disabled={loading}
+                          className="w-full h-11 rounded-xl flex justify-center items-center bg-black text-white font semibold hover:bg-gray-900 transition"
+                        >
+                          {loading ? (
+                            <CircleDashed
+                              size={18}
+                              color="white"
+                              className="animate-spin"
+                            />
+                          ) : (
+                            "Sign up"
+                          )}
                         </button>
                       </div>
                       <p className="mt-6 text-center text-sm text-gray-500">

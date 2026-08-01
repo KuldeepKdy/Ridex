@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Provider from "@/lib/Provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "RIDEX - Smart Vehicle Booking Platform",
-  description: "RIDEX is a modern multi-vendor vehicle booking platform that allows users to easily book cars, bikes and commercial vehicles online. With a user-friendly interface and advanced features, RIDEX provides a seamless booking experience for both customers and vendors.",
+  description:
+    "RIDEX is a modern multi-vendor vehicle booking platform that allows users to easily book cars, bikes and commercial vehicles online. With a user-friendly interface and advanced features, RIDEX provides a seamless booking experience for both customers and vendors.",
 };
 
 export default function RootLayout({
@@ -27,7 +29,9 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Provider>{children}</Provider>
+      </body>
     </html>
   );
 }

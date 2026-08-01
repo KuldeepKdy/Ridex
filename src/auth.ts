@@ -3,8 +3,10 @@ import Credentials from "next-auth/providers/credentials";
 import connectDB from "./lib/db";
 import User from "./models/user.model";
 import Google from "next-auth/providers/google";
+import bcrypt from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  debug: true,
   providers: [
     Credentials({
       credentials: {
@@ -19,7 +21,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           placeholder: "*****",
         },
       },
-      async authorize(credentials,request) {
+      async authorize(credentials, request) {
+         console.log("authorize started");
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Missing credentials");
         }
@@ -31,22 +34,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!user) {
           throw new Error("User does not exist");
         }
-        const isMatch = await user.comparePassword(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password!);
         if (!isMatch) {
           throw new Error("Incorrect password");
         }
+        console.log("returning user");
         return {
-          id: user._id,
+          id: user._id.toString(),
           name: user.name,
           email: user.email,
           role: user.role,
         };
-      }
+      },
     }),
     Google({
-        clientId: process.env.AUTH_GOOGLE_ID,
-        clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    })
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
   ],
   callbacks: {
     async signIn({ user, account }) {
@@ -59,28 +63,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             email: user.email,
           });
         }
-        user.id = dbUser._id;
+        user.id = dbUser._id.toString();
         user.role = dbUser.role;
       }
       return true;
     },
-    async jwt({token , user}) {
-        token.id = user.id;
-        token.name = user.name;
-        token.email = user.email;
-        token.role = user.role;
-
-        return token;
+    async jwt({ token, user }) {
+      console.log("JWT CALLBACK");
+      console.log({ token, user });
+      if (user) {
+        token.id = user?.id;
+        token.name = user?.name;
+        token.email = user?.email;
+        token.role = user?.role;
+      }
+      return token;
     },
-    async session({session, token}) {
-        if (session.user) {
-            session.user.id = token.id as string;
-            session.user.name = token.name;
-            session.user.email = token.email as string;
-            session.user.role = token.role as string;
-        }
+    async session({ session, token }) {
+      console.log("SESSION CALLBACK");
+      console.log({ session, token });
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.name = token.name;
+        session.user.email = token.email as string;
+        session.user.role = token.role as string;
+      }
 
-        return session;
+      return session;
     },
   },
   pages: {
@@ -88,10 +97,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signOut: "/signout",
     error: "/error",
   },
-  session:{
+  session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.AUTH_SECRET,
-
 });
