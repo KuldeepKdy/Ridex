@@ -20,8 +20,8 @@ function AuthModal({ open, onClose }: propType) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
-  const {data} = useSession();
-  console.log("data",data);
+  const { data } = useSession();
+  console.log("data", data);
   const handleSignUp = async () => {
     setLoading(true);
     try {
@@ -44,13 +44,19 @@ function AuthModal({ open, onClose }: propType) {
 
   const handleLogin = async () => {
     setLoading(true);
-  const res = await  signIn("credentials", {
+    const res = await signIn("credentials", {
       email,
       password,
-      redirect:false
+      redirect: false,
     });
     setLoading(false);
     console.log(res);
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    await signIn("google");
+    setLoading(false);
   };
   return (
     <>
@@ -84,7 +90,10 @@ function AuthModal({ open, onClose }: propType) {
                     Premium Vehicle Booking
                   </div>
                 </div>
-                <button className="w-full h-11 rounded-xl border border-black/20 flex items-center justify-center gap-3 text-sm font-semibold hover:bg-black hover:text-white transition">
+                <button
+                  onClick={handleGoogleLogin}
+                  className="w-full h-11 rounded-xl border border-black/20 flex items-center justify-center gap-3 text-sm font-semibold hover:bg-black hover:text-white transition"
+                >
                   <Image
                     src="/google.png"
                     alt="google"
