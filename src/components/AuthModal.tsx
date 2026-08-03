@@ -19,6 +19,7 @@ function AuthModal({ open, onClose }: propType) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
   const { data } = useSession();
   console.log("data", data);
@@ -30,7 +31,26 @@ function AuthModal({ open, onClose }: propType) {
         email,
         password,
       });
+      setStep("otp");
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      setErr(
+        error.response.data.message
+          ? error.response.data.message
+          : "Something went wrong",
+      );
+    }
+  };
+  const handleVerifyEmail = async () => {
+    setLoading(true);
+    try {
+      const data = await axios.post("/api/auth/verify-email", {
+        email,
+        otp: otp.join(""),
+      });
       console.log(data);
+      setStep("login");
       setLoading(false);
     } catch (error: any) {
       setLoading(false);
@@ -58,6 +78,20 @@ function AuthModal({ open, onClose }: propType) {
     await signIn("google");
     setLoading(false);
   };
+
+  const handleChangeOtp = (index: number, value: string) => {   
+    if (!/^[0-9]?$/.test(value)) return;
+    const updated = [...otp];
+    updated[index] = value;
+    setOtp(updated);
+    if (value && index < otp.length-1) {
+      document.getElementById(`otp-${index+1}`)?.focus();
+    }
+    if (!value && index > 0 ) {
+      document.getElementById(`otp-${index-1}`)?.focus();
+    }
+  };
+
   return (
     <>
       <AnimatePresence>
@@ -217,7 +251,7 @@ function AuthModal({ open, onClose }: propType) {
                               className="animate-spin"
                             />
                           ) : (
-                            "Sign up"
+                            "Send Otp"
                           )}
                         </button>
                       </div>
@@ -230,6 +264,51 @@ function AuthModal({ open, onClose }: propType) {
                           Login
                         </span>
                       </p>
+                    </motion.div>
+                  )}
+                  {step == "otp" && (
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className=""
+                    >
+                      <h2 className="text-xl font-semibold">
+                        Verify your Email
+                      </h2>
+                      <div className="mt-6 flex justify-between gap-2">
+                        {otp.map((digit, index) => (
+                          <input
+                            key={index}
+                            id={`otp-${index}`}
+                            value={digit}
+                            maxLength={1}
+                            type="text"
+                            placeholder="*"
+                            className="w-10 h-12 sm:w-12 text-center text-lg font-semibold rounded-xl bg-white border border-black/20 outline-none"
+                            onChange={(e) =>
+                              handleChangeOtp(index, e.target.value)
+                            }
+                          />
+                        ))}
+                      </div>
+                      {err && (
+                        <p className=" text-red-500 capitalize">{err}!</p>
+                      )}
+                      <button
+                        onClick={handleVerifyEmail}
+                        className="w-full mt-6 text-center flex justify-center items-center h-11 font-semibold rounded-xl bg-black text-white hover:bg-gray-900 transition"
+                      >
+                        {loading ? (
+                          <CircleDashed
+                            size={18}
+                            color="white"
+                            className="animate-spin"
+                          />
+                        ) : (
+                          "Verify OTP and Create Account"
+                        )}
+                      </button>
                     </motion.div>
                   )}
                 </div>
