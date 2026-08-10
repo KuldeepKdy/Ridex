@@ -8,8 +8,8 @@ import AuthModal from "./AuthModal";
 import { RootState } from "@/redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { Bike, Car, ChevronRight, LogOut, Menu, Truck, X } from "lucide-react";
-import { signOut } from "@/auth";
 import { setUserData } from "@/redux/userSlice";
+import { signOut } from "next-auth/react";
 
 const Nav_Items = ["Home", "About", "Contact", "Booking"];
 
