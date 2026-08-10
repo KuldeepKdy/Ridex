@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "motion/react";
-import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
+// import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
 
 function Footer() {
   return (
@@ -20,7 +20,7 @@ function Footer() {
               Transparent pricing.
             </p>
             <div className="flex gap-4 mt-6">
-              {[Facebook, Instagram, Twitter, Linkedin].map((item, index) => (
+              {/* {[Facebook, Instagram, Twitter, Linkedin].map((item, index) => (
                 <motion.a
                   key={index}
                   whileHover={{ scale: 1.1 }}
@@ -32,7 +32,7 @@ function Footer() {
                   <item.Icon size={24} />
                   <span className="text-sm font-medium">{item.name}</span>
                 </motion.a>
-              ))}
+              ))} */}
             </div>
           </div>
         </div>

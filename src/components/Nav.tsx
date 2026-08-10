@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import AuthModal from "./AuthModal";
 import { RootState } from "@/redux/store";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,6 +25,7 @@ function Nav() {
     dispatch(setUserData(null));
     setProfileOpen(false);
   };
+  const router = useRouter();
   return (
     <>
       <motion.div
@@ -57,7 +58,7 @@ function Nav() {
           </div>
 
           <div className="flex items-center gap-3 relative">
-            <div className="hidden md:hidden relative">
+            <div className=" hidden md:block relative">
               {!userData ? (
                 <button
                   onClick={() => setAuthOpen(true)}
@@ -88,7 +89,12 @@ function Nav() {
                           </p>
                           <p className="">{userData.role}</p>
                           {userData.role != "partner" && (
-                            <div className="w-full flex items-center gap-3 py-3 hover:bg-gray-100 rounded-xl">
+                            <div
+                              onClick={() =>
+                                router.push("/partner/onboarding/vehicle")
+                              }
+                              className="w-full flex items-center gap-3 py-3 hover:bg-gray-100 rounded-xl"
+                            >
                               <div className="flex -space-x-2">
                                 <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center ">
                                   <Bike size={16} className="" />
@@ -208,7 +214,10 @@ function Nav() {
                 <p className="font-semibold text-lg">{userData.name}</p>
                 <p className="">{userData.role}</p>
                 {userData.role != "partner" && (
-                  <div className="w-full flex items-center gap-3 py-3 hover:bg-gray-100 rounded-xl">
+                  <div
+                    onClick={() => router.push("/partner/onboarding/vehicle")}
+                    className="w-full flex items-center gap-3 py-3 hover:bg-gray-100 rounded-xl"
+                  >
                     <div className="flex -space-x-2">
                       <div className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center ">
                         <Bike size={16} className="" />
