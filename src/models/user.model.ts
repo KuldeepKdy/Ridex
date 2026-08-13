@@ -9,6 +9,7 @@ export interface IUser extends Document {
   otp?: string;
   otpExpiresAt?: Date;
   partnerOnBoardingSteps: number;
+  mobileNumber?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,6 +44,9 @@ const userSchema = new mongoose.Schema<IUser>(
       default: 0,
     },
     otp: {
+      type: String,
+    },
+    mobileNumber: {
       type: String,
     },
     otpExpiresAt: {
