@@ -10,27 +10,27 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const session = await auth();
     if (!session || !session.user?.email) {
-      return new Response("Unauthorized", { status: 400 });
+      return  Response.json("Unauthorized", { status: 400 });
     }
 
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
-      return new Response("User not found", { status: 400 });
+      return  Response.json("User not found", { status: 400 });
     }
     const { type, number, vehicleModel } = await req.json();
     if (!type || !number || !vehicleModel) {
-      return new Response("Missing required details", { status: 400 });
+      return  Response.json("Missing required details", { status: 400 });
     }
 
     if (!VEHICLE_REGEX.test(number)) {
-      return new Response("Invalid Vehicle Number Format", { status: 400 });
+      return  Response.json("Invalid Vehicle Number Format", { status: 400 });
     }
 
     const vehicleNumber = number.toUpperCase();
 
     const duplicate = await Vehicle.findOne({ number: vehicleNumber });
     if (duplicate) {
-      return new Response("Vehicle already registered ", { status: 400 });
+      return  Response.json("Vehicle already registered ", { status: 400 });
     }
 
     let vehicle = await Vehicle.findOne({ owner: session.user.id });
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       vehicle.vehicleModel = vehicleModel;
       vehicle.status = "pending";
       await vehicle.save();
-      return new Response(vehicle, { status: 200 });
+      return Response.json(vehicle, { status: 200 });
     }
     vehicle = await Vehicle.create({
       type,
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     }
     user.role = "partner";
     await user.save();
-    return new Response(vehicle, { status: 201 });
+    return Response.json(vehicle, { status: 201 });
   } catch (error) {
     return Response.json(
       { message: `vehicle error ${error}` },
@@ -66,12 +66,12 @@ export async function GET(req: NextRequest) {
     await connectDB();
     const session = await auth();
     if (!session || !session.user?.email) {
-      return new Response("Unauthorized", { status: 400 });
+      return  Response.json("Unauthorized", { status: 400 });
     }
 
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
-      return new Response("User not found", { status: 400 });
+      return  Response.json("User not found", { status: 400 });
     }
 
     const vehicle = await Vehicle.findOne({ owner: user._id });
