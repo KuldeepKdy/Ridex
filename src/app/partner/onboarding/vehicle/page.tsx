@@ -1,6 +1,13 @@
 "use client";
 import axios from "axios";
-import { ArrowLeft, Bike, Car, Package, Truck } from "lucide-react";
+import {
+  ArrowLeft,
+  Bike,
+  Car,
+  CircleDashed,
+  Package,
+  Truck,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -17,17 +24,23 @@ function Page() {
   const [vehicleType, setVehicleType] = useState("");
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [vehicleModel, setVehicleModel] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleVehicle = async () => {
+    setError("");
     try {
+      setLoading(true);
       const { data } = await axios.post("/api/partner/onboarding/vehicle", {
         type: vehicleType,
         number: vehicleNumber,
         vehicleModel: vehicleModel,
       });
-      console.log(data);
-    } catch (error) {
+      setLoading(false);
+    } catch (error: any) {
+      setError(error?.response?.data?.message ?? "Something went wrong");
       console.log(error);
+      setLoading(false);
     }
   };
   return (
@@ -110,13 +123,20 @@ function Page() {
             />
           </div>
 
+          {error && <p className="text-red-500 mt-4">*{error}</p>}
+
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
+            disabled={loading}
             className="mt-8 w-full h-14 rounded-2xl bg-black text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40 transition"
             onClick={handleVehicle}
           >
-            Continue
+            {loading ? (
+              <CircleDashed className=" text-white animate-spin" />
+            ) : (
+              "Continue"
+            )}
           </motion.button>
         </div>
       </motion.div>
