@@ -20,8 +20,8 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const aadhar = formData.get("aadhar") as Blob | null;
-    const license = formData.get("drivingLicense") as Blob | null;
-    const rc = formData.get("vehicleRC") as Blob | null;
+    const license = formData.get("license") as Blob | null;
+    const rc = formData.get("rc") as Blob | null;
 
     if (!aadhar || !license || !rc) {
       return Response.json(
