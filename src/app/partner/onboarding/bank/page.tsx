@@ -1,4 +1,5 @@
 "use client";
+import axios from "axios";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -6,12 +7,41 @@ import {
   Landmark,
   Phone,
   CheckCircle,
+  CircleDashed,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 function Page() {
   const router = useRouter();
+  const [accountHolder, setAccountHolder] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [ifsc, setIfsc] = useState("");
+  const [upi, setUpi] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleBank = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const { data } = await axios.post("/api/partner/onboarding/bank", {
+        accountHolder,
+        accountNumber,
+        ifsc,
+        upi,
+        mobileNumber,
+      });
+      console.log(data);
+      setLoading(false);
+    } catch (error: any) {
+      setError(error?.response?.data?.message ?? "Something went wrong");
+      console.log(error);
+      setLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <motion.div
@@ -46,6 +76,8 @@ function Page() {
                 type="text"
                 id="ahn"
                 placeholder="As per bank records"
+                value={accountHolder}
+                onChange={(e) => setAccountHolder(e.target.value)}
                 className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
               />
             </div>
@@ -66,6 +98,8 @@ function Page() {
                 type="text"
                 id="ahn"
                 placeholder="Enter account number"
+                value={accountNumber}
+                onChange={(e) => setAccountNumber(e.target.value)}
                 className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
               />
             </div>
@@ -86,6 +120,8 @@ function Page() {
                 type="text"
                 id="ahn"
                 placeholder="HDFC0001234"
+                value={ifsc}
+                onChange={(e) => setIfsc(e.target.value)}
                 className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
               />
             </div>
@@ -106,6 +142,8 @@ function Page() {
                 type="text"
                 id="ahn"
                 placeholder="10 digit mobile number"
+                value={mobileNumber}
+                onChange={(e) => setMobileNumber(e.target.value)}
                 className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
               />
             </div>
@@ -123,11 +161,15 @@ function Page() {
                 type="text"
                 id="ahn"
                 placeholder="name@upi"
+                value={upi}
+                onChange={(e) => setUpi(e.target.value)}
                 className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
               />
             </div>
           </div>
         </div>
+
+        {error && <p className="text-red-500 mt-4">*{error}</p>}
 
         <div className="mt-6 flex items-start gap-3 text-xs text-gray-500">
           <CheckCircle size={16} className="mt-0.5" />
@@ -140,9 +182,15 @@ function Page() {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
+          onClick={handleBank}
+          disabled={loading}
           className="mt-8 w-full h-14 rounded-2xl bg-black text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40 transition"
         >
-          Continue
+          {loading ? (
+            <CircleDashed className=" text-white animate-spin" />
+          ) : (
+            "Continue"
+          )}
         </motion.button>
       </motion.div>
     </div>
