@@ -12,6 +12,7 @@ import {
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+const IFSC_REGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
 
 function Page() {
   const router = useRouter();
@@ -22,6 +23,16 @@ function Page() {
   const [mobileNumber, setMobileNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const sanitizeIfsc = ifsc.trim().toUpperCase();
+  const isNameValid = accountHolder.trim().length > 3;
+  const isAccountValid = accountNumber.trim().length > 9;
+  const isIfscValid = IFSC_REGEX.test(sanitizeIfsc);
+  const isMobileValid = mobileNumber.trim().length == 10;
+
+  const canSubmit = () => {
+    return isNameValid && isAccountValid && isIfscValid && isMobileValid;
+  };
 
   const handleBank = async () => {
     setError("");
@@ -42,6 +53,7 @@ function Page() {
       setLoading(false);
     }
   };
+  
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <motion.div
