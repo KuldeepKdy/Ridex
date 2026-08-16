@@ -41,7 +41,7 @@ function Page() {
       const { data } = await axios.post("/api/partner/onboarding/bank", {
         accountHolder,
         accountNumber,
-        ifsc,
+        sanitizeIfsc,
         upi,
         mobileNumber,
       });
@@ -53,7 +53,7 @@ function Page() {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <motion.div
@@ -90,9 +90,14 @@ function Page() {
                 placeholder="As per bank records"
                 value={accountHolder}
                 onChange={(e) => setAccountHolder(e.target.value)}
-                className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
+                className={`flex-1 border-b pb-2 text-sm focus:outline-none ${!isNameValid && accountHolder.length > 0 ? "border-red-400 focus:border-red-500" : "border-gray-300 focus:border-black"}`}
               />
             </div>
+            {!isNameValid && accountHolder.length > 0 && (
+              <p className="mt-1 text-xs text-red-500">
+                Minimum 3 characters required
+              </p>
+            )}
           </div>
 
           <div>
@@ -112,9 +117,14 @@ function Page() {
                 placeholder="Enter account number"
                 value={accountNumber}
                 onChange={(e) => setAccountNumber(e.target.value)}
-                className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
+                className={`flex-1 border-b pb-2 text-sm focus:outline-none ${!isAccountValid && accountNumber.length > 0 ? "border-red-400 focus:border-red-500" : "border-gray-300 focus:border-black"}`}
               />
             </div>
+            {!isAccountValid && accountNumber.length > 0 && (
+              <p className="mt-1 text-xs text-red-500">
+                Account number should be 9 digits
+              </p>
+            )}
           </div>
 
           <div>
@@ -132,11 +142,14 @@ function Page() {
                 type="text"
                 id="ahn"
                 placeholder="HDFC0001234"
-                value={ifsc}
+                value={ifsc.toUpperCase()}
                 onChange={(e) => setIfsc(e.target.value)}
-                className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
+                className={`flex-1 border-b pb-2 text-sm focus:outline-none ${!isIfscValid && ifsc.length > 0 ? "border-red-400 focus:border-red-500" : "border-gray-300 focus:border-black"}`}
               />
             </div>
+            {!isIfscValid && ifsc.length > 0 && (
+              <p className="mt-1 text-xs text-red-500">Invalid IFSC code</p>
+            )}
           </div>
 
           <div>
@@ -156,9 +169,14 @@ function Page() {
                 placeholder="10 digit mobile number"
                 value={mobileNumber}
                 onChange={(e) => setMobileNumber(e.target.value)}
-                className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
+                className={`flex-1 border-b pb-2 text-sm focus:outline-none ${!isMobileValid && mobileNumber.length > 0 ? "border-red-400 focus:border-red-500" : "border-gray-300 focus:border-black"}`}
               />
             </div>
+            {!isMobileValid && mobileNumber.length > 0 && (
+              <p className="mt-1 text-xs text-red-500">
+                Enter a valid 10 digit mobile number
+              </p>
+            )}
           </div>
 
           <div>
@@ -195,7 +213,7 @@ function Page() {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
           onClick={handleBank}
-          disabled={loading}
+          disabled={!canSubmit || loading}
           className="mt-8 w-full h-14 rounded-2xl bg-black text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40 transition"
         >
           {loading ? (
