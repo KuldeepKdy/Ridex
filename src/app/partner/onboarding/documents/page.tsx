@@ -45,6 +45,8 @@ function Page() {
     if (!file) return;
     setDocs((prev) => ({ ...prev, [doc]: file }));
   };
+
+  const isCompleted = docs.aadhar && docs.license && docs.rc;
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <motion.div
@@ -73,12 +75,18 @@ function Page() {
               <p className="text-sm font-semibold">Aadhar / ID Proof</p>
               <p className="text-xs text-gray-500">Government issued ID</p>
             </div>
-            <div>
-              <span className="text-xs text-gray-400">Upload</span>
-              <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-                <UploadCloud size={18} />
+            {docs.aadhar ? (
+              <span className="text-xs text-gray-600 font-medium">
+                Uploaded
+              </span>
+            ) : (
+              <div>
+                <span className="text-xs text-gray-400">Upload</span>
+                <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+                  <UploadCloud size={18} />
+                </div>
               </div>
-            </div>
+            )}
             <input
               type="file"
               hidden
@@ -96,12 +104,18 @@ function Page() {
               <p className="text-sm font-semibold">Driving License</p>
               <p className="text-xs text-gray-500">Valid Driving License</p>
             </div>
-            <div>
-              <span className="text-xs text-gray-400">Upload</span>
-              <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-                <UploadCloud size={18} />
+            {docs.license ? (
+              <span className="text-xs text-gray-600 font-medium">
+                Uploaded
+              </span>
+            ) : (
+              <div>
+                <span className="text-xs text-gray-400">Upload</span>
+                <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+                  <UploadCloud size={18} />
+                </div>
               </div>
-            </div>
+            )}
             <input
               type="file"
               hidden
@@ -119,12 +133,20 @@ function Page() {
               <p className="text-sm font-semibold">Vehicle RC</p>
               <p className="text-xs text-gray-500">Registration Certificate</p>
             </div>
-            <div>
-              <span className="text-xs text-gray-400">Upload</span>
-              <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-                <UploadCloud size={18} />
+
+            {docs.rc ? (
+              <span className="text-xs text-gray-600 font-medium">
+                Uploaded
+              </span>
+            ) : (
+              <div>
+                <span className="text-xs text-gray-400">Upload</span>
+                <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
+                  <UploadCloud size={18} />
+                </div>
               </div>
-            </div>
+            )}
+
             <input
               type="file"
               hidden
@@ -145,7 +167,7 @@ function Page() {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
           onClick={handleDocs}
-          disabled={loading}
+          disabled={loading || !isCompleted}
           className="mt-8 w-full h-14 rounded-2xl bg-black text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40 transition"
         >
           {loading ? (

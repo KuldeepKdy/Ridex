@@ -9,12 +9,12 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const session = await auth();
     if (!session || !session.user?.email) {
-      return  Response.json("Unauthorized", { status: 400 });
+      return Response.json("Unauthorized", { status: 400 });
     }
 
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
-      return  Response.json("User not found", { status: 400 });
+      return Response.json("User not found", { status: 400 });
     }
 
     const { accountHolder, accountNumber, upi, ifsc, mobileNumber } =
@@ -59,18 +59,21 @@ export async function GET(req: NextRequest) {
     await connectDB();
     const session = await auth();
     if (!session || !session.user?.email) {
-      return  Response.json("Unauthorized", { status: 400 });
+      return Response.json("Unauthorized", { status: 400 });
     }
 
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
-      return  Response.json("User not found", { status: 400 });
+      return Response.json("User not found", { status: 400 });
     }
 
     const partnerBank = await PartnerBank.findOne({ owner: user._id });
 
     if (partnerBank) {
-      return  Response.json(partnerBank, { status: 201 });
+      return Response.json(
+        { partnerBank, mobileNumber: user.mobileNumber },
+        { status: 201 },
+      );
     } else {
       return null;
     }

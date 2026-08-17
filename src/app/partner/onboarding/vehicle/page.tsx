@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 const VEHICLES = [
   { id: "bike", label: "Bike", icon: Bike, desc: "2 wheeler" },
   { id: "auto", label: "Auto", icon: Car, desc: "3 wheeler ride" },
@@ -43,6 +43,20 @@ function Page() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handleGetVehicle = async () => {
+      try {
+        const { data } = await axios.get("/api/partner/onboarding/vehicle");
+        setVehicleType(data.type);
+        setVehicleNumber(data.number);
+        setVehicleModel(data.vehicleModel);
+      } catch (error: any) {
+        console.log(error);
+      }
+    };
+    handleGetVehicle();
+  }, []);
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <motion.div

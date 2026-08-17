@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 const IFSC_REGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
 
 function Page() {
@@ -53,6 +53,22 @@ function Page() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handleGetBank = async () => {
+      try {
+        const { data } = await axios.post("/api/partner/onboarding/bank");
+        setAccountHolder(data.partnerBank.accountHolder);
+        setAccountNumber(data.partnerBank.accountNumber);
+        setIfsc(data.partnerBank.ifsc);
+        setUpi(data.partnerBank.upi);
+        setMobileNumber(data.mobileNumber);
+      } catch (error: any) {
+        console.log(error);
+      }
+    };
+    handleGetBank();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
