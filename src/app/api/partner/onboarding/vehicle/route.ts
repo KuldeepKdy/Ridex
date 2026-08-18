@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
     const vehicle = await Vehicle.findOne({ owner: user._id });
 
     if (vehicle) {
-      return new Response(vehicle, { status: 201 });
+      return Response.json(vehicle, { status: 201 });
     } else {
       return null;
     }
