@@ -41,7 +41,7 @@ function Page() {
       const { data } = await axios.post("/api/partner/onboarding/bank", {
         accountHolder,
         accountNumber,
-        sanitizeIfsc,
+        ifsc:sanitizeIfsc,
         upi,
         mobileNumber,
       });
@@ -57,7 +57,7 @@ function Page() {
   useEffect(() => {
     const handleGetBank = async () => {
       try {
-        const { data } = await axios.post("/api/partner/onboarding/bank");
+        const { data } = await axios.get("/api/partner/onboarding/bank");
         setAccountHolder(data.partnerBank.accountHolder);
         setAccountNumber(data.partnerBank.accountNumber);
         setIfsc(data.partnerBank.ifsc);

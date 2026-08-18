@@ -17,9 +17,9 @@ export async function POST(req: NextRequest) {
       return Response.json("User not found", { status: 400 });
     }
 
-    const { accountHolder, accountNumber, upi, ifsc, mobileNumber } =
+    const { accountHolder, accountNumber, ifsc, upi, mobileNumber } =
       await req.json();
-    if (!accountHolder || !accountNumber || !ifsc || mobileNumber) {
+    if (!accountHolder || !accountNumber || !ifsc || !mobileNumber) {
       return Response.json(
         { message: `send all bank details` },
         { status: 400 },

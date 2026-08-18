@@ -76,7 +76,7 @@ function Page() {
               <p className="text-xs text-gray-500">Government issued ID</p>
             </div>
             {docs.aadhar ? (
-              <span className="text-xs text-gray-600 font-medium">
+              <span className="text-xs text-green-500 font-medium">
                 Uploaded
               </span>
             ) : (
@@ -105,7 +105,7 @@ function Page() {
               <p className="text-xs text-gray-500">Valid Driving License</p>
             </div>
             {docs.license ? (
-              <span className="text-xs text-gray-600 font-medium">
+              <span className="text-xs text-green-500 font-medium">
                 Uploaded
               </span>
             ) : (
@@ -135,7 +135,7 @@ function Page() {
             </div>
 
             {docs.rc ? (
-              <span className="text-xs text-gray-600 font-medium">
+              <span className="text-xs text-green-500 font-medium">
                 Uploaded
               </span>
             ) : (

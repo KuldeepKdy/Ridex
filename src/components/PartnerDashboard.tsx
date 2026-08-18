@@ -43,7 +43,7 @@ function PartnerDashboard() {
     }
   };
 
-  const progressPercentage = ((activeStep - 1) / TOTAL_STEPS - 1) * 100;
+  const progressPercentage = ((activeStep - 1) / (TOTAL_STEPS - 1)) * 100;
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-100 to-gray-200 px-4 pt-28 pb-20">
@@ -56,11 +56,11 @@ function PartnerDashboard() {
         </div>
         <div className="bg-white rounded-3xl p-10 shadow-xl border overflow-x-auto">
           <div className="relative min-w-[800px]">
-            <div className="absolute top-7 left-0 w-full h-[3x] text-gray-200 rounded-full" />
+            <div className="absolute top-7 left-0 w-full h-[3px] bg-gray-200 rounded-full" />
             <motion.div
               animate={{ width: `${progressPercentage}%` }}
               transition={{ duration: 0.6 }}
-              className="absolute top-7 length-0 h-[3px] bg-black rounded-full"
+              className="absolute top-7 left-0 h-[3px] bg-black rounded-full "
             />
             <div className="relative flex justify-between">
               {STEPS.map((s, index) => {
