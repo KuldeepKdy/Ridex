@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   try {
     await connectDB();
     const session = await auth();
-    if (!session || !session.user?.email || session.user.role !== "admin") {
+    if (!session || !session.user?.email ) {
       return Response.json("Unauthorized", { status: 400 });
     }
 
