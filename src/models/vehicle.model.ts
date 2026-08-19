@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 type VehicleType = "bike" | "car" | "loading" | "auto" | "truck";
 
-interface IVehicle {
+export interface IVehicle {
   owner: mongoose.Types.ObjectId;
   type: VehicleType;
   vehicleModel: string;
