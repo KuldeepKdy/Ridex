@@ -28,9 +28,9 @@ type Tab = "partner" | "kyc" | "vehicle";
 function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("partner");
-  const [partnerReviews, setPartnerReviews] = useState<any>();
-  const [pendingKyc, setPendingKyc] = useState<any>();
-  const [vehicleReviews, setVehicleReviews] = useState<any>();
+  const [partnerReviews, setPartnerReviews] = useState<any>([]);
+  const [pendingKyc, setPendingKyc] = useState<any>([]);
+  const [vehicleReviews, setVehicleReviews] = useState<any>([]);
   const handleGetData = async () => {
     try {
       const { data } = await axios.get("/api/admin/dashboard");
