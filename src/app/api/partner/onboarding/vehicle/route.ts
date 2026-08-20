@@ -10,20 +10,20 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const session = await auth();
     if (!session || !session.user?.email) {
-      return  Response.json("Unauthorized", { status: 400 });
+      return Response.json("Unauthorized", { status: 400 });
     }
 
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
-      return  Response.json("User not found", { status: 400 });
+      return Response.json("User not found", { status: 400 });
     }
     const { type, number, vehicleModel } = await req.json();
     if (!type || !number || !vehicleModel) {
-      return  Response.json("Missing required details", { status: 400 });
+      return Response.json("Missing required details", { status: 400 });
     }
 
     if (!VEHICLE_REGEX.test(number)) {
-      return  Response.json("Invalid Vehicle Number Format", { status: 400 });
+      return Response.json("Invalid Vehicle Number Format", { status: 400 });
     }
 
     const vehicleNumber = number.toUpperCase();
@@ -35,12 +35,21 @@ export async function POST(req: NextRequest) {
       vehicle.vehicleModel = vehicleModel;
       vehicle.status = "pending";
       await vehicle.save();
+      if (user.partnerOnBoardingSteps < 2) {
+        user.partnerOnBoardingSteps = 2;
+         user.partnerStatus = "pending";
+        await user.save();
+      } else {
+        user.partnerOnBoardingSteps = 3;
+         user.partnerStatus = "pending";
+        await user.save();
+      }
       return Response.json(vehicle, { status: 200 });
     }
-     const duplicate = await Vehicle.findOne({ number: vehicleNumber });
-     if (duplicate) {
-       return Response.json("Vehicle already registered ", { status: 400 });
-     }
+    const duplicate = await Vehicle.findOne({ number: vehicleNumber });
+    if (duplicate) {
+      return Response.json("Vehicle already registered ", { status: 400 });
+    }
     vehicle = await Vehicle.create({
       owner: user._id,
       type,
@@ -50,7 +59,9 @@ export async function POST(req: NextRequest) {
     if (user.partnerOnBoardingSteps < 1) {
       user.partnerOnBoardingSteps = 1;
     }
+
     user.role = "partner";
+    user.partnerStatus = "pending";
     await user.save();
     return Response.json(vehicle, { status: 201 });
   } catch (error) {

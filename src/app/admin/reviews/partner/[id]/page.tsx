@@ -7,12 +7,13 @@ import { IPartnerDocs } from "@/models/partnerDocs.model";
 import { IUser } from "@/models/user.model";
 import { IVehicle } from "@/models/vehicle.model";
 import axios from "axios";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowLeft,
   Car,
   Check,
   CheckCircle,
+  CircleDashed,
   Clock,
   FileText,
   Landmark,
@@ -29,6 +30,11 @@ function Page() {
   const [vehicleDetails, setVehicleDetails] = useState<IVehicle | null>(null);
   const [partnerDocs, setPartnerDocs] = useState<IPartnerDocs | null>(null);
   const [partnerBank, setPartnerBank] = useState<IPartnerBank | null>(null);
+  const [showApprove, setShowApprove] = useState(false);
+  const [showReject, setShowReject] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [approveLoading, setApproveLoading] = useState(false);
+  const [rejectLoading, setRejectLoading] = useState(false);
   const router = useRouter();
   const handleGetPartner = async () => {
     try {
@@ -55,6 +61,40 @@ function Page() {
         Loading Partner...
       </div>
     );
+
+  const handleApprove = async () => {
+    setApproveLoading(true);
+    try {
+      const { data } = await axios.get(
+        `/api/admin/reviews/partner/${id}/approve`,
+      );
+      console.log(data);
+      setShowApprove(false);
+      setApproveLoading(false);
+      router.push(`/`);
+    } catch (error) {
+      console.log(error);
+      setApproveLoading(false);
+    }
+  };
+  const handleReject = async () => {
+    setRejectLoading(true);
+    try {
+      const { data } = await axios.post(
+        `/api/admin/reviews/partner/${id}/reject`,
+        {
+          rejectionReason,
+        },
+      );
+      console.log(data);
+      setShowReject(false);
+      setRejectLoading(false);
+      router.push(`/`);
+    } catch (error) {
+      console.log(error);
+      setRejectLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-100 to-gray-200">
       <div className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b">
@@ -161,10 +201,16 @@ function Page() {
                 Verify documents carefully before approving.
               </p>
               <div className="flex flex-col gap-4 ">
-                <button className="py-3 rounded-2xl bg-linear-to-r from-black to-gray-800 text-white font-semibold hover:opacity-90 transition">
+                <button
+                  onClick={() => setShowApprove(true)}
+                  className="py-3 rounded-2xl bg-linear-to-r from-black to-gray-800 text-white font-semibold hover:opacity-90 transition"
+                >
                   Approve
                 </button>
-                <button className="py-3 rounded-2xl border font-semibold hover:bg-gray-100 transition">
+                <button
+                  onClick={() => setShowReject(true)}
+                  className="py-3 rounded-2xl border font-semibold hover:bg-gray-100 transition"
+                >
                   Reject
                 </button>
               </div>
@@ -172,6 +218,84 @@ function Page() {
           )}
         </div>
       </main>
+
+      <AnimatePresence>
+        {showApprove && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-50 backdrop-blur-sm flex items-center justify-center px-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="bg-white rounded-3xl p-6 w-full max-w-sm"
+            >
+              <h2 className="text-lg font-bold">Approve Partner</h2>
+              <p className="text-sm text-gray-500 mt-2">
+                Confirm all information has been verified.
+              </p>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowApprove(false)}
+                  className="flex-1 py-2 rounded-xl border"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleApprove}
+                  disabled={approveLoading}
+                  className="flex-1 py-2 rounded-xl flex items-center justify-center bg-black text-white"
+                >
+                { approveLoading ? <CircleDashed className=" text-white animate-spin" /> : "Yes, Approve" }
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showReject && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-50 backdrop-blur-sm flex items-center justify-center px-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="bg-white rounded-3xl p-6 w-full max-w-sm"
+            >
+              <h2 className="text-lg font-bold">Reject Partner</h2>
+              <p className="text-sm text-gray-500 mt-2">
+                <textarea
+                  placeholder="Enter rejection reason (required)"
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  className="w-full mt-3 border rounded-xl p-3 text-sm"
+                />
+              </p>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowReject(false)}
+                  className="flex-1 py-2 rounded-xl border"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleReject}
+                  disabled={rejectLoading}
+                  className="flex-1 py-2 rounded-xl flex items-center justify-center bg-black text-white"
+                >
+                  { rejectLoading ? <CircleDashed className=" text-white animate-spin" /> : "Reject" }
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

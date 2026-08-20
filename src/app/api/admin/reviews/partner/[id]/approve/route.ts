@@ -19,7 +19,7 @@ export async function GET(
     const partnerId = (await context.params).id;
     const partner = await User.findById(partnerId);
 
-    if (!partner || partner.role !== "partner") {
+     if (!partner || partner.role !== "partner") {
       return Response.json({ message: "Partner not found" }, { status: 400 });
     }
     if (partner.partnerStatus === "approved") {
