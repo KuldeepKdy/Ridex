@@ -4,8 +4,10 @@ import { RootState } from "@/redux/store";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { motion } from "motion/react";
-import { Check, Lock } from "lucide-react";
+import { Check, Clock, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
+import RejectionCard from "./RejectionCard";
+import StatusCard from "./StatusCard";
 
 type Step = {
   id: number;
@@ -95,6 +97,13 @@ function PartnerDashboard() {
             </div>
           </div>
         </div>
+
+        {activeStep == 4 && userData?.partnerStatus === "rejected" && (
+          <RejectionCard title="Partner Rejected" reason={userData?.rejectionReason} actionLabel={`Review and Update`} onAction={() => router.push(`/partner/onboarding/vehicle`)} />
+        )}
+        {activeStep == 4 && userData?.partnerStatus === "pending" && (
+          <StatusCard icon={<Clock size={18} />} title="Documents Under Review" desc={`Admin is verifying your documents.`}  />
+        )}
       </div>
     </div>
   );
