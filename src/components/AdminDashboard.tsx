@@ -41,8 +41,18 @@ function AdminDashboard() {
       console.log(error);
     }
   };
+  const handleGetPendingKYC = async () => {
+    try {
+      const { data } = await axios.get("/api/admin/video-kyc/pending");
+      setPendingKyc(data);
+      console.log("aaja ve aaja maahi", data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
+    handleGetPendingKYC();
     handleGetData();
   }, []);
   return (
