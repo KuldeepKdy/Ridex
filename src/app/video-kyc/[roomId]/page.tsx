@@ -3,7 +3,19 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import Image from "next/image";
-import { Video, VideoOff } from "lucide-react";
+import {
+  CheckCircle,
+  Mic,
+  MicOff,
+  PhoneOff,
+  Video,
+  VideoOff,
+  XCircle,
+  X,
+} from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import axios from "axios";
+import { AnimatePresence, motion } from "motion/react";
 
 function Page() {
   const { userData } = useSelector((state: RootState) => state.user);
@@ -13,6 +25,14 @@ function Page() {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
+  const { roomId } = useParams();
+  const [loading, setLoading] = useState(false);
+  const [aLoading, setALoading] = useState(false);
+  const [rLoading, setRLoading] = useState(false);
+  const [reason, setReason] = useState("");
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const router = useRouter();
   useEffect(() => {
     if (joined) return;
     let localStream: MediaStream | null = null;
@@ -44,9 +64,45 @@ function Page() {
     setIsMicOn(!isMicOn);
   };
 
+  const handleApprove = async (action: string) => {
+    setALoading(true);
+    try {
+      const { data } = await axios.post(`/api/admin/video-kyc/complete`, {
+        roomId,
+        action: "approved",
+      });
+
+      console.log(data);
+      setALoading(false);
+      router.push(`/`);
+    } catch (error: any) {
+      console.log(error.response.data.message ?? error);
+    }
+  };
+  const handleRejected = async (action: string, reason: string) => {
+    setRLoading(true);
+    try {
+      const { data } = await axios.post(`/api/admin/video-kyc/complete`, {
+        roomId,
+        action: "rejected",
+        reason,
+      });
+
+      console.log(data);
+      setRLoading(false);
+      router.push(`/`);
+    } catch (error: any) {
+      console.log(error.response.data.message ?? error);
+    }
+  };
+
   const startCall = async () => {
-    console.log("user data", userData);
     if (!containerRef) console.log("no ref");
+    setLoading(true);
+    const displayName =
+      userData?.role == "admin"
+        ? "Admin"
+        : `${userData?.name} (${userData?.email}) `;
     try {
       const { ZegoUIKitPrebuilt } =
         await import("@zegocloud/zego-uikit-prebuilt");
@@ -55,9 +111,9 @@ function Page() {
       const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
         appId,
         serverSecret!,
-        "efefegdv",
+        roomId?.toString()!,
         userData?._id?.toString(),
-        "kuldeep",
+        displayName,
       );
       const zp = ZegoUIKitPrebuilt.create(kitToken);
       zp.joinRoom({
@@ -69,6 +125,7 @@ function Page() {
         showPreJoinView: false,
       });
       setJoined(true);
+      setLoading(false);
     } catch (error) {
       console.log(error);
     }
@@ -85,8 +142,42 @@ function Page() {
               : "Partner Video KYC"}
           </p>
         </div>
+        {joined && (
+          <div className="flex flex-wrap gap-3">
+            {userData?.role == "admin" && (
+              <>
+                <button
+                  onClick={() => {
+                    setShowApprovalModal(true);
+                  }}
+                  className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-full text-sm flex items-center gap-2"
+                >
+                  <CheckCircle size={16} />
+                  Approve
+                </button>
+                <button
+                  onClick={() => {
+                    setShowRejectionModal(true);
+                  }}
+                  className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-full text-sm flex items-center gap-2"
+                >
+                  <XCircle size={16} />
+                  Reject
+                </button>
+              </>
+            )}
+            <button className="bg-red-700 hover:bg-red-800 px-4 py-2 rounded-full text-sm flex items-center gap-2">
+              <PhoneOff size={16} onClick={() => router.push(`/`)} />
+              End Call
+            </button>
+          </div>
+        )}
       </div>
       <div className="flex-1 relative">
+        <div
+          ref={containerRef}
+          className={`absolute inset-0 ${joined ? "block" : "hidden"}`}
+        />
         {!joined && (
           <div className="h-full flex items-center justify-center px-4 py-10">
             <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -107,23 +198,113 @@ function Page() {
                     onClick={toggleCamera}
                     className={`w-14 h-14 rounded-full flex items-center justify-center transition ${isCameraOn ? "bg-white text-black" : "bg-white/10 border border-white/20"}`}
                   >
-                    {isCameraOn ? <Video /> : <VideoOff />} Camera
+                    {isCameraOn ? <Video /> : <VideoOff />}
                   </button>
                   <button
                     onClick={toggleMic}
                     className={`w-14 h-14 rounded-full flex items-center justify-center transition ${isMicOn ? "bg-white text-black" : "bg-white/10 border border-white/20"}`}
                   >
-                    {isMicOn ? <Video /> : <VideoOff />} Mic
+                    {isMicOn ? <Mic /> : <MicOff />}
                   </button>
                 </div>
-                <button className="w-full h-14 rounded-2xl bg-black text-white font-semibold ">
-
+                <button
+                  onClick={startCall}
+                  disabled={loading}
+                  className="w-full bg-white text-black py-4 rounded-xl font-semibold"
+                >
+                  {loading ? "Connecting..." : "Join Secure Call"}
                 </button>
               </div>
             </div>
           </div>
         )}
       </div>
+      <AnimatePresence>
+        {showApprovalModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 z-50 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="relative bg-[#111] w-full  max-w-md rounded-2xl p-6 shadow-2xl"
+            >
+              <button
+                onClick={() => setShowApprovalModal(false)}
+                className="absolute top-4 right-4 text-gray-400"
+              >
+                <X size={16} />
+              </button>
+              <h2 className="text-lg font-semibold mb-4">Confirm Approval</h2>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setShowApprovalModal(false)}
+                  className="flex-1 border rounded-xl py-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  className="flex-1 bg-green-600 rounded-xl py-2"
+                  disabled={aLoading}
+                  onClick={() => handleApprove}
+                >
+                  {aLoading ? "Processing..." : "Approve"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showRejectionModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 z-50 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="relative bg-[#111] w-full  max-w-md rounded-2xl p-6 shadow-2xl"
+            >
+              <button
+                onClick={() => setShowRejectionModal(false)}
+                className="absolute top-4 right-4 text-gray-400"
+              >
+                <X size={16} />
+              </button>
+              <h2 className="text-lg font-semibold mb-4">Reject Partner</h2>
+              <textarea
+                placeholder="Enter rejection reason (required)"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                className="w-full bg-white/10 border border-white/20 rounded-xl p-3 mb-4 text-sm"
+              />
+
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setShowRejectionModal(false)}
+                  className="flex-1 border rounded-xl py-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  className="flex-1 bg-green-600 rounded-xl py-2"
+                  disabled={aLoading}
+                  onClick={() => handleRejected("rejected", reason)}
+                >
+                  {rLoading ? "Processing..." : "Reject"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
