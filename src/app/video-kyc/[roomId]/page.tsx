@@ -64,7 +64,7 @@ function Page() {
     setIsMicOn(!isMicOn);
   };
 
-  const handleApprove = async (action: string) => {
+  const handleApprove = async () => {
     setALoading(true);
     try {
       const { data } = await axios.post(`/api/admin/video-kyc/complete`, {
@@ -79,7 +79,7 @@ function Page() {
       console.log(error.response.data.message ?? error);
     }
   };
-  const handleRejected = async (action: string, reason: string) => {
+  const handleRejected = async () => {
     setRLoading(true);
     try {
       const { data } = await axios.post(`/api/admin/video-kyc/complete`, {
@@ -249,7 +249,7 @@ function Page() {
                 <button
                   className="flex-1 bg-green-600 rounded-xl py-2"
                   disabled={aLoading}
-                  onClick={() => handleApprove}
+                  onClick={ handleApprove}
                 >
                   {aLoading ? "Processing..." : "Approve"}
                 </button>
@@ -295,8 +295,8 @@ function Page() {
                 </button>
                 <button
                   className="flex-1 bg-green-600 rounded-xl py-2"
-                  disabled={aLoading}
-                  onClick={() => handleRejected("rejected", reason)}
+                  disabled={rLoading}
+                  onClick={ handleRejected}
                 >
                   {rLoading ? "Processing..." : "Reject"}
                 </button>

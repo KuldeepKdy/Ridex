@@ -131,8 +131,8 @@ function PartnerDashboard() {
                 reason={userData?.videoKycRejectionReason}
                 actionLabel={requestLoading ? "Requesting..." : "Request Again"}
                 onAction={async () => {
-                  (setRequestLoading(true),
-                    await axios.get(`/api/partner/video-kyc/request`));
+                  setRequestLoading(true);
+                  await axios.get(`/api/partner/video-kyc/request`);
                   setRequestLoading(false);
                 }}
               />
