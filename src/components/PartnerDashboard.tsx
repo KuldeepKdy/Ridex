@@ -46,6 +46,20 @@ function PartnerDashboard() {
     }
   }, [userData]);
 
+  const handleGetPricing = async () => {
+    try {
+      const { data } = await axios.get("/api/partner/onboarding/pricing");
+      console.log(data);
+      setVehicleData(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    handleGetPricing();
+  }, []);
+
   const goToStep = (step: Step) => {
     if (
       step.id == 6 &&
@@ -170,11 +184,27 @@ function PartnerDashboard() {
         )}
       </div>
 
-      <PricingModal 
+      {activeStep == 7 && vehicleData?.status === "pending" && (
+        <StatusCard
+          icon={<Clock size={18} />}
+          title="Pricing Under Review"
+          desc={`Admin will initiate vehicle approval shortly.`}
+        />
+      )}
+      {activeStep == 7 && vehicleData?.status === "rejected" && (
+        <RejectionCard
+          title="Pricing Rejected"
+          reason={vehicleData?.rejectionReason}
+          actionLabel={`Edit & Resubmit`}
+          onAction={() => setShowPricing(true)}
+        />
+      )}
+
+      <PricingModal
         open={showPricing}
         onClose={() => setShowPricing(false)}
         data={vehicleData}
-       />
+      />
     </div>
   );
 }

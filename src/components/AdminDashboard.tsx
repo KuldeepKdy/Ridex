@@ -36,7 +36,7 @@ function AdminDashboard() {
       const { data } = await axios.get("/api/admin/dashboard");
       setStats(data.stats);
       setPartnerReviews(data.pendingPartnersReviews);
-      console.log("aaja ve aaja maahi", data);
+      setVehicleReviews(data.pendingVehicles);
     } catch (error) {
       console.log(error);
     }
@@ -45,7 +45,6 @@ function AdminDashboard() {
     try {
       const { data } = await axios.get("/api/admin/video-kyc/pending");
       setPendingKyc(data);
-      console.log("aaja ve aaja maahi", data);
     } catch (error) {
       console.log(error);
     }

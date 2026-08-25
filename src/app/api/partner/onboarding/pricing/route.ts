@@ -4,7 +4,7 @@ import User from "@/models/user.model";
 import Vehicle from "@/models/vehicle.model";
 import { NextRequest } from "next/server";
 
-async function POST(req: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
     await connectDB();
     const session = await auth();
@@ -64,6 +64,33 @@ async function POST(req: NextRequest) {
       { message: "pricing submitted successfully" },
       { status: 200 },
     );
+  } catch (error) {
+    return Response.json(
+      { message: `vehicle pricing update error ${error}` },
+      { status: 500 },
+    );
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    await connectDB();
+    const session = await auth();
+    if (!session || !session.user?.email) {
+      return Response.json("Unauthorized", { status: 400 });
+    }
+
+    const partner = await User.findOne({ email: session.user.email });
+    if (!partner) {
+      return Response.json({ message: "partner not found" }, { status: 400 });
+    }
+
+    const vehicle = await Vehicle.findOne({ owner: partner._id });
+    if (!vehicle) {
+      return Response.json({ message: "Vehicle not found" }, { status: 400 });
+    }
+
+    return Response.json(vehicle, { status: 200 });
   } catch (error) {
     return Response.json(
       { message: `vehicle pricing update error ${error}` },

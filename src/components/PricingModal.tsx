@@ -1,7 +1,7 @@
 "use client";
 
 import { IVehicle } from "@/models/vehicle.model";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ImagePlus, IndianRupee } from "lucide-react";
 import axios from "axios";
@@ -22,6 +22,15 @@ function PricingModal({
   const [waitingCharge, setWaitingCharge] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (data) {
+      setBaseFare(data?.baseFare?.toString() || "");
+      setPricePerKM(data?.pricePerKM?.toString() || "");
+      setWaitingCharge(data?.waitingCharge?.toString() || "");
+      setPreview(data?.imageUrl || null);
+    }
+  }, [data]);
+
   const handleSubmit = async () => {
     setLoading(true);
     try {
@@ -37,6 +46,7 @@ function PricingModal({
       });
       console.log(data);
       setLoading(false);
+      onClose();
     } catch (error: any) {
       console.log(error.response.data.message ?? error);
     }
@@ -134,7 +144,11 @@ function PricingModal({
               >
                 Cancel
               </button>
-              <button onClick={handleSubmit} disabled={loading} className="flex-1 bg-black text-white rounded-xl py-2">
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="flex-1 bg-black text-white rounded-xl py-2"
+              >
                 {loading ? "Saving..." : "Save"}
               </button>
             </div>
