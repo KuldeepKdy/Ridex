@@ -48,7 +48,11 @@ export async function GET(req: NextRequest) {
       vehicleType: vehicleTypeMap.get(String(p._id)),
     }));
 
-    const pendingVehicles = await Vehicle.find({status: "pending"}).populate("owner");
+    const pendingVehicles = await Vehicle.find({
+      status: "pending",
+      baseFare: { $exists: true },
+      pricePerKM: { $exists: true },
+    }).populate("owner");
 
     return NextResponse.json(
       {

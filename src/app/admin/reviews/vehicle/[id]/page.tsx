@@ -8,6 +8,7 @@ import { IUser } from "@/models/user.model";
 import {
   ArrowLeft,
   CheckCircle,
+  CircleDashed,
   Clock,
   ImageIcon,
   IndianRupee,
@@ -15,7 +16,7 @@ import {
   Truck,
   XCircle,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import AnimatedCard from "@/components/AnimatedCard";
 
 interface IVehicle {
@@ -40,6 +41,10 @@ function Page() {
   const router = useRouter();
   const [showApprove, setShowApprove] = useState(false);
   const [showReject, setShowReject] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [approveLoading, setApproveLoading] = useState(false);
+  const [rejectLoading, setRejectLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     const load = async () => {
       try {
@@ -52,6 +57,46 @@ function Page() {
     load();
   }, [id]);
 
+  if (loading)
+    return (
+      <div className="min-h-screen grid place-items-center text-gray-500">
+        Loading Partner...
+      </div>
+    );
+
+  const handleApprove = async () => {
+    setApproveLoading(true);
+    try {
+      const { data } = await axios.get(
+        `/api/admin/reviews/vehicle/${id}/approve`,
+      );
+      console.log(data);
+      setShowApprove(false);
+      setApproveLoading(false);
+      router.push(`/`);
+    } catch (error) {
+      console.log(error);
+      setApproveLoading(false);
+    }
+  };
+  const handleReject = async () => {
+    setRejectLoading(true);
+    try {
+      const { data } = await axios.post(
+        `/api/admin/reviews/vehicle/${id}/reject`,
+        {
+          reason: rejectionReason,
+        },
+      );
+      console.log(data);
+      setShowReject(false);
+      setRejectLoading(false);
+      router.push(`/`);
+    } catch (error) {
+      console.log(error);
+      setRejectLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-100 to-gray-200 ">
       <div className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b">
@@ -175,6 +220,91 @@ function Page() {
           )}
         </div>
       </main>
+      <AnimatePresence>
+        {showApprove && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-50 backdrop-blur-sm flex items-center justify-center px-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="bg-white rounded-3xl p-6 w-full max-w-sm"
+            >
+              <h2 className="text-lg font-bold">Approve Vehicle</h2>
+              <p className="text-sm text-gray-500 mt-2">
+                Confirm all information has been verified.
+              </p>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowApprove(false)}
+                  className="flex-1 py-2 rounded-xl border"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleApprove}
+                  disabled={approveLoading}
+                  className="flex-1 py-2 rounded-xl flex items-center justify-center bg-black text-white"
+                >
+                  {approveLoading ? (
+                    <CircleDashed className=" text-white animate-spin" />
+                  ) : (
+                    "Yes, Approve"
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showReject && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-50 backdrop-blur-sm flex items-center justify-center px-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="bg-white rounded-3xl p-6 w-full max-w-sm"
+            >
+              <h2 className="text-lg font-bold">Reject Vehicle</h2>
+              <p className="text-sm text-gray-500 mt-2">
+                <textarea
+                  placeholder="Enter rejection reason (required)"
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  className="w-full mt-3 border rounded-xl p-3 text-sm"
+                />
+              </p>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowReject(false)}
+                  className="flex-1 py-2 rounded-xl border"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleReject}
+                  disabled={rejectLoading}
+                  className="flex-1 py-2 rounded-xl flex items-center justify-center bg-black text-white"
+                >
+                  {rejectLoading ? (
+                    <CircleDashed className=" text-white animate-spin" />
+                  ) : (
+                    "Reject"
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
