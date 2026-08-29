@@ -41,9 +41,11 @@ function PricingModal({
       if (image) {
         formData.append("image", image);
       }
-      const { data } = await axios.post("/api/partner/onboarding/pricing", {
-        data: formData,
-      });
+      console.log("prinnnted dataa", formData);
+      const { data } = await axios.post(
+        "/api/partner/onboarding/pricing",
+        formData,
+      );
       console.log(data);
       setLoading(false);
       onClose();

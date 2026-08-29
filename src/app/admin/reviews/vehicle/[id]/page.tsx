@@ -50,6 +50,7 @@ function Page() {
       try {
         const result = await axios.get(`/api/admin/reviews/vehicle/${id}`);
         setData(result.data);
+        console.log("result data",result.data);
       } catch (error: any) {
         console.log(error.response.data.message ?? error);
       }
@@ -88,7 +89,6 @@ function Page() {
           reason: rejectionReason,
         },
       );
-      console.log(data);
       setShowReject(false);
       setRejectLoading(false);
       router.push(`/`);

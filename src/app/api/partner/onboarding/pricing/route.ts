@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { uploadOnCloudinary } from "@/lib/cloudinary";
 import connectDB from "@/lib/db";
 import User from "@/models/user.model";
 import Vehicle from "@/models/vehicle.model";
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
     let updated = false;
 
     if (image && image.size > 0) {
-      const imageUrl = URL.createObjectURL(image);
+      const imageUrl = await uploadOnCloudinary(image);
       vehicle.imageUrl = imageUrl;
       updated = true;
     }

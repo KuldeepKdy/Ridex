@@ -182,37 +182,37 @@ function PartnerDashboard() {
             )}
           </>
         )}
+
+        {activeStep == 7 && vehicleData?.status === "pending" && (
+          <StatusCard
+            icon={<Clock size={18} />}
+            title="Pricing Under Review"
+            desc={`Admin will initiate vehicle approval shortly.`}
+          />
+        )}
+        {activeStep == 7 && vehicleData?.status === "rejected" && (
+          <RejectionCard
+            title="Pricing Rejected"
+            reason={vehicleData?.rejectionReason}
+            actionLabel={`Edit & Resubmit`}
+            onAction={() => setShowPricing(true)}
+          />
+        )}
+
+        {activeStep == 8 && vehicleData?.status == "approved" && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-black text-white rounded-3xl p-10 shadow-2xl"
+          >
+            <h2 className="text-2xl font-bold">🚀 You're Live</h2>
+
+            <button className="mt-6 bg-white text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2">
+              Go to Bookings <ArrowRight size={16} />
+            </button>
+          </motion.div>
+        )}
       </div>
-
-      {activeStep == 7 && vehicleData?.status === "pending" && (
-        <StatusCard
-          icon={<Clock size={18} />}
-          title="Pricing Under Review"
-          desc={`Admin will initiate vehicle approval shortly.`}
-        />
-      )}
-      {activeStep == 7 && vehicleData?.status === "rejected" && (
-        <RejectionCard
-          title="Pricing Rejected"
-          reason={vehicleData?.rejectionReason}
-          actionLabel={`Edit & Resubmit`}
-          onAction={() => setShowPricing(true)}
-        />
-      )}
-
-      {activeStep == 8 && vehicleData?.status == "approved" && (
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-black text-white rounded-3xl p-10 shadow-2xl"
-        >
-          <h2 className="text-2xl font-bold">🚀 You're Live</h2>
-
-          <button className="mt-6 bg-white text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2">
-            Go to Bookings <ArrowRight size={16} />
-          </button>
-        </motion.div>
-      )}
 
       <PricingModal
         open={showPricing}
