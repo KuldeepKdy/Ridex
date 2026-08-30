@@ -1,7 +1,7 @@
 "use client";
 
 import { VehicleType } from "@/models/vehicle.model";
-import { ArrowLeft, Bike, Car, CheckCircle, Truck } from "lucide-react";
+import { ArrowLeft, Bike, Car, CheckCircle, Phone, Truck } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -95,34 +95,79 @@ function Page() {
                         key={v.id}
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.07 + i * 0.05}}
-                        whileTap={{scale:0.95}}
+                        transition={{ delay: 0.07 + i * 0.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => setVehicle(v.id as VehicleType)}
                         className={`relative p-3.5 rounded-2xl border flex items-center gap-3 text-left transition-all duration-200 ${active ? "bg-zinc-900 border-zinc-900 shadow-lg" : "bg-zinc-50 border-zinc-200 hover:border-zinc-400"} `}
                       >
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${active ? "bg-white":"bg-zinc-200"}`}>
-                          <v.Icon size={18}
-                          className={active ? "text-zinc-900":"text-zinc-600"}
-                           />
+                        <div
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${active ? "bg-white" : "bg-zinc-200"}`}
+                        >
+                          <v.Icon
+                            size={18}
+                            className={
+                              active ? "text-zinc-900" : "text-zinc-600"
+                            }
+                          />
                         </div>
                         <div className="min-w-0">
-                          <p className={`text-sm font-bold truncate ${active ? "text-white":"text-zinc-900"}`}>{v.label}</p>
-                          <p className={`text-[10px] turncate ${active ? "text-zinc-400":"text-zinc-400"}`}>{v.desc}</p>
+                          <p
+                            className={`text-sm font-bold truncate ${active ? "text-white" : "text-zinc-900"}`}
+                          >
+                            {v.label}
+                          </p>
+                          <p
+                            className={`text-[10px] turncate ${active ? "text-zinc-400" : "text-zinc-400"}`}
+                          >
+                            {v.desc}
+                          </p>
                         </div>
                         <motion.div
-                        initial={{scale:0}}
-                        animate={{scale:1}}
-                        className="absolute top-2.5 right-2.5"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="absolute top-2.5 right-2.5"
                         >
-                          <CheckCircle size={13} className="text-white fill-white/20" />
+                          <CheckCircle
+                            size={13}
+                            className="text-white fill-white/20"
+                          />
                         </motion.div>
-                       
                       </motion.div>
                     );
                   })}
                 </div>
               </motion.div>
             </div>
+            <div className="h-px bg-zinc-200" />
+            <motion.div
+              variants={stepVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.05 }}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-5 h-5 rounded-full bg-zinc-900 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-[9px] font-black">2</span>
+                </div>
+                <p className="text-xs font-black text-zinc-500 uppercase tracking-widest">
+                  Mobile
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 bg-zinc-50 border border-zinc-200 rounded-2xl px-4 py-3 focus-within:border-zinc-900 focus-within:bg-white transition-all" >
+                <div className="w-8 h-8 rounded-xl bg-zinc-200 flex items-center justify-center">
+
+                <Phone size={18} className="text-zinc-800" />
+                </div>
+                <input type="text"
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+                placeholder="Enter your mobile number"
+                maxLength={15}
+                className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
+                 />
+              </div>
+            </motion.div>
           </div>
         </div>
       </motion.div>
