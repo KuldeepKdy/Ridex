@@ -1,8 +1,9 @@
 "use client";
 
 import { VehicleType } from "@/models/vehicle.model";
-import { ArrowLeft, Bike, Car, CheckCircle, Phone, Truck } from "lucide-react";
-import { motion } from "motion/react";
+import axios from "axios";
+import { ArrowLeft, Bike, Car, CheckCircle, LocateFixed, Phone, Truck } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -24,12 +25,37 @@ function Page() {
   const [mobile, setMobile] = useState("");
   const [pickUp, setPickUp] = useState("");
   const [drop, setDrop] = useState("");
+  const [pickUpCountry, setPickUpCountry] = useState("");
+  const [pickUpLat, setPickUpLat] = useState<number>();
+  const [pickUpLon, setPickUpLon] = useState<number>();
+  const [locating, setLocating] = useState(false);
   const progress = [
     !!vehicle,
     !!(mobile.length == 10),
     !!pickUp,
     !!drop,
   ].filter(Boolean).length;
+
+  const useCurrentLocation = () => {
+    setLocating(true);
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(async({ coords }) => {
+      try{
+        const { data } = await axios.get(`https://photon.komoot.io/reverse?lon=${coords.longitude}&lat=${coords.latitude}`);
+        if(data.features.length ){
+          const p = data.features[0].properties;
+          const address = [p.name, p.street, p.city, p.state, p.country].filter(Boolean).join(", ");
+          setPickUp(address);
+          setPickUpLat(coords.latitude);
+          setPickUpLon(coords.longitude);
+          setLocating(false);
+        }
+      }catch(e){
+        console.log(e);
+        setLocating(false);
+      }
+    });
+  };
 
   return (
     <div className="min-h-screen bg-zinc-100 flex items-center justify-center px-4 py-10">
@@ -154,20 +180,87 @@ function Page() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 bg-zinc-50 border border-zinc-200 rounded-2xl px-4 py-3 focus-within:border-zinc-900 focus-within:bg-white transition-all" >
+              <div className="flex items-center gap-3 bg-zinc-50 border border-zinc-200 rounded-2xl px-4 py-3 focus-within:border-zinc-900 focus-within:bg-white transition-all">
                 <div className="w-8 h-8 rounded-xl bg-zinc-200 flex items-center justify-center">
-
-                <Phone size={18} className="text-zinc-800" />
+                  <Phone size={14} className="text-zinc-600" />
                 </div>
-                <input type="text"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
-                placeholder="Enter your mobile number"
-                maxLength={15}
-                className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
-                 />
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Enter your mobile number"
+                  maxLength={15}
+                  className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
+                />
+
+                <AnimatePresence>
+                  {mobile.length == 10 && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className=""
+                    >
+                      <CheckCircle
+                        size={16}
+                        className="text-emerald-500 fill-emerald-50 flex-shrink-0"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
+              <p className="text-zinc-400 text-[10px] mt-1.5 ml-1">
+                Ride updates will be sent to this number
+              </p>
             </motion.div>
+            <div className="h-px bg-zinc-200" />
+             <motion.div
+              variants={stepVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.05 }}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-5 h-5 rounded-full bg-zinc-900 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-[9px] font-black">3</span>
+                </div>
+                <p className="text-xs font-black text-zinc-500 uppercase tracking-widest">
+                  Route
+                </p>
+              </div>
+
+              <div className="bg-zinc-50 border border-zinc-200 rounded-2xl overflow-visible">
+                <div className="relative z-20">
+                  <div className="flex items-center gap-3 px-4 py-3.5 focus-within:bg-white rounded-t-2xl transition-colors">
+                    <div className="flex flex-col items-center flex-shrink-0">
+                      <div className="w-3 h-3 rounded-full bg-zinc-900 border-2 border-white shadow" />
+                      <div className="w-px h-5 bg-zinc-300 mt-1" />
+                    </div>
+
+                    <input 
+                    onChange={(e) => setPickUp(e.target.value)}
+                    value={pickUp}
+                    placeholder="Pickup location"
+                    className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
+                     />
+                     <motion.button
+                      whileTap={{ scale: 0.88 }}
+                      onClick={useCurrentLocation}
+                      disabled={locating}
+                      className="w-8 h-8 rounded-xl bg-zinc-200 hover:bg-zinc-300 transition-colors flex items-center justify-center flex-shrink-0"
+                     >
+                      <LocateFixed size={14} className={`text-zinc-700 ${locating ? "animate-spin" : ""}`} />
+                     </motion.button>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </motion.div>
+
           </div>
         </div>
       </motion.div>
