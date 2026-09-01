@@ -2,7 +2,17 @@
 
 import { VehicleType } from "@/models/vehicle.model";
 import axios from "axios";
-import { ArrowLeft, Bike, Car, CheckCircle, LocateFixed, Phone, Truck } from "lucide-react";
+import {
+  ArrowLeft,
+  Bike,
+  Car,
+  CheckCircle,
+  ChevronRight,
+  LocateFixed,
+  MapPin,
+  Phone,
+  Truck,
+} from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -19,6 +29,18 @@ const VEHICLES = [
   { id: "loading", label: "Loading", Icon: Truck, desc: "Small cargo" },
   { id: "truck", label: "Truck", Icon: Truck, desc: "Heavy transport" },
 ];
+
+type Place = {
+  id: string;
+  name: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  countrycode?: string;
+  lat: number;
+  lon: number;
+};
+
 function Page() {
   const router = useRouter();
   const [vehicle, setVehicle] = useState<VehicleType | "">();
@@ -29,6 +51,7 @@ function Page() {
   const [pickUpLat, setPickUpLat] = useState<number>();
   const [pickUpLon, setPickUpLon] = useState<number>();
   const [locating, setLocating] = useState(false);
+  const [pickUpSuggestions, setPickUpSuggestions] = useState<Place[]>([]);
   const progress = [
     !!vehicle,
     !!(mobile.length == 10),
@@ -36,21 +59,55 @@ function Page() {
     !!drop,
   ].filter(Boolean).length;
 
+  const searchAddress = async (q: string, setResults: (r: Place[]) => void) => {
+    try {
+      if (!q || q.trim().length < 3) {
+        setResults([]);
+        return;
+      }
+      const { data } = await axios.get(
+        `https://photon.komoot.io/api/?q=${encodeURIComponent(q.trim())}&limit=8&lang=en`,
+      );
+
+      const results: Place[] = (data?.features ?? []).map((f: any) => ({
+        id: String(f.properties.osm_id),
+        name: f.properties.name,
+        city: f.properties.city,
+        state: f.properties.state,
+        country: f.properties.country,
+        countrycode: f.properties.countrycode,
+        lat: f.geometry.coordinates[1],
+        lon: f.geometry.coordinates[0],
+      }));
+      setResults(results);
+    } catch (error) {
+      console.log(error);
+      setResults([]);
+    }
+  };
+
+  const suggestion = (p: Place) =>
+    [p.name, p.city, p.state, p.country].filter(Boolean).join(", ");
   const useCurrentLocation = () => {
     setLocating(true);
     if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(async({ coords }) => {
-      try{
-        const { data } = await axios.get(`https://photon.komoot.io/reverse?lon=${coords.longitude}&lat=${coords.latitude}`);
-        if(data.features.length ){
+    navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+      try {
+        const { data } = await axios.get(
+          `https://photon.komoot.io/reverse?lon=${coords.longitude}&lat=${coords.latitude}`,
+        );
+        if (data.features.length) {
           const p = data.features[0].properties;
-          const address = [p.name, p.street, p.city, p.state, p.country].filter(Boolean).join(", ");
+          const address = [p.name, p.street, p.city, p.state, p.country]
+            .filter(Boolean)
+            .join(", ");
           setPickUp(address);
           setPickUpLat(coords.latitude);
           setPickUpLon(coords.longitude);
+          setPickUpSuggestions([]);
           setLocating(false);
         }
-      }catch(e){
+      } catch (e) {
         console.log(e);
         setLocating(false);
       }
@@ -215,7 +272,7 @@ function Page() {
               </p>
             </motion.div>
             <div className="h-px bg-zinc-200" />
-             <motion.div
+            <motion.div
               variants={stepVariants}
               initial="hidden"
               animate="visible"
@@ -238,29 +295,61 @@ function Page() {
                       <div className="w-px h-5 bg-zinc-300 mt-1" />
                     </div>
 
-                    <input 
-                    onChange={(e) => setPickUp(e.target.value)}
-                    value={pickUp}
-                    placeholder="Pickup location"
-                    className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
-                     />
-                     <motion.button
+                    <input
+                      onChange={(e) => {
+                        setPickUp(e.target.value);
+                        searchAddress(e.target.value, setPickUpSuggestions);
+                      }}
+                      value={pickUp}
+                      placeholder="Pickup location"
+                      className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
+                    />
+                    <motion.button
                       whileTap={{ scale: 0.88 }}
                       onClick={useCurrentLocation}
                       disabled={locating}
                       className="w-8 h-8 rounded-xl bg-zinc-200 hover:bg-zinc-300 transition-colors flex items-center justify-center flex-shrink-0"
-                     >
-                      <LocateFixed size={14} className={`text-zinc-700 ${locating ? "animate-spin" : ""}`} />
-                     </motion.button>
-
+                    >
+                      <LocateFixed
+                        size={14}
+                        className={`text-zinc-700 ${locating ? "animate-spin" : ""}`}
+                      />
+                    </motion.button>
                   </div>
-
+                  <AnimatePresence>
+                    {pickUpSuggestions?.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute top-full left-0 right-0 mt-1 bg-white border border-zinc-200 rounded-2xl shadow-xl max-h-52 overflow-y-auto z-50"
+                      >
+                        {pickUpSuggestions.map((p, i) => (
+                          <motion.div
+                            key={p.id}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: i * 0.03 }}
+                            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-zinc-50 transition-colors border-b border-zinc-100 last:border-0"
+                            onClick={() => {
+                              setPickUp(suggestion(p));
+                              setPickUpCountry(p.country ?? "");
+                              setPickUpLat(p.lat);
+                              setPickUpLon(p.lon);
+                            }}
+                          >
+                            <MapPin size={13} className="text-zinc-400 flex-shrink-0" />
+                            <span className="text-sm text-zinc-800 font-medium truncate">{suggestion(p)}</span>
+                            <ChevronRight size={13} className="text-zinc-300 flex-shrink-0 ml-auto" />
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-
               </div>
-
             </motion.div>
-
           </div>
         </div>
       </motion.div>
