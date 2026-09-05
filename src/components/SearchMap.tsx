@@ -3,12 +3,12 @@
 type props = {
   pickUp: string;
   drop: string;
-  OnChange: (p: string, d: string) => void;
+  onChange: (p: string, d: string) => void;
   onDistance: (d: number) => void;
 };
 import axios from "axios";
 import L from "leaflet";
-import { MapPin } from "lucide-react";
+import { MapPin, Navigation2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import {
@@ -75,11 +75,11 @@ const dropIcon = new L.DivIcon({
   iconSize: [90, 58],
   iconAnchor: [45, 58],
 });
-function SearchMap({ pickUp, drop, OnChange, onDistance }: props) {
+function SearchMap({ pickUp, drop, onChange, onDistance }: props) {
   const [p1, setP1] = useState<[number, number]>();
   const [p2, setP2] = useState<[number, number]>();
   const [route, setRoute] = useState<[number, number][]>([]);
-  const [km, setKm] = useState<number | null>();
+  const [km, setKm] = useState<number | null>(0);
   const [ready, setReady] = useState(false);
   const geoCoding = async (q: string): Promise<[number, number] | null> => {
     try {
@@ -95,6 +95,16 @@ function SearchMap({ pickUp, drop, OnChange, onDistance }: props) {
     }
   };
 
+  const reverseGeoCoding = async (lat: number, lon: number) => {
+    const { data } = await axios.get(
+      `https://photon.komoot.io/reverse?lon=${lon}&lat=${lat}`,
+    );
+    if (!data.features.length) return;
+    const p = data.features[0].properties;
+    return [p.name, p.street, p.city, p.state, p.country]
+      .filter(Boolean)
+      .join(", ");
+  };
   const loadRoute = async (p: [number, number], d: [number, number]) => {
     try {
       const { data } = await axios.get(
@@ -119,12 +129,16 @@ function SearchMap({ pickUp, drop, OnChange, onDistance }: props) {
   };
 
   const dragPickUp = async (lat: number, lon: number) => {
+    const addr = await reverseGeoCoding(lat, lon);
     setP1([lat, lon]);
     loadRoute([lat, lon], p2!);
+    onChange(addr!, drop);
   };
   const dragDrop = async (lat: number, lon: number) => {
+    const addr = await reverseGeoCoding(lat, lon);
     setP2([lat, lon]);
     loadRoute(p1!, [lat, lon]);
+    onChange(pickUp, addr!);
   };
 
   useEffect(() => {
@@ -217,6 +231,30 @@ function SearchMap({ pickUp, drop, OnChange, onDistance }: props) {
               />
               <MapPin size={15} className="text-zinc-800" />
             </div>
+            <div className="text-center">
+              <p className="text-zinc-900 text-xs font-black tracking-[0.222em] uppercase">
+                Loading Map
+              </p>
+              <p className="text-zinc-400 text-[10px] font-medium tracking-wider mt-0.5">
+                Plotting your route...
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {ready && km !== null && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute bottom-20 left-4 z-[500] flex items-center gap-2 bg-white border border-zinc-200 px-3.5 py-2 rounded-full shadow-lg"
+          >
+            <Navigation2 size={13} className="text-zinc-900" />
+            <span className="text-zinc-900 text-xs font-bold">{km} km</span>
+            <span className="w-px h-3 bg-zinc-200" />
+            <span>~{Math.max(3, Math.round((km / 25) * 60))}</span>
           </motion.div>
         )}
       </AnimatePresence>
