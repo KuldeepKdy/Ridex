@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { ArrowLeft, MapPin, Navigation } from "lucide-react";
 import { VehicleType } from "@/models/vehicle.model";
 import { useState } from "react";
-import { SearchMap } from "@/components/SearchMap";
+import  SearchMap from "@/components/SearchMap";
 
 function Page() {
   const router = useRouter();
@@ -12,7 +12,7 @@ function Page() {
 
   const [pickUp, setPickUp] = useState(params.get("pickUp") || "");
   const [drop, setDrop] = useState(params.get("drop") || "");
-  const [km, setKm] = useState();
+  const [km, setKm] = useState<number | null>();
   const mobile = params.get("mobile") || "";
   const pickUpLat = Number(params.get("pickuplat"));
   const pickUpLon = Number(params.get("pickuplon"));
@@ -36,7 +36,7 @@ function Page() {
         <SearchMap
           pickUp={pickUp}
           drop={drop}
-          OnChange={(p, d) => {
+          onChange={(p, d) => {
             setPickUp(p);
             setDrop(d);
           }}

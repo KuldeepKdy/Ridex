@@ -47,7 +47,7 @@ function HeroSection({ onAuthRequired }: { onAuthRequired: () => void }) {
         <motion.div
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          onClick={userData ? onAuthRequired : ()=>router.push("/user/book")}
+          onClick={!userData ? onAuthRequired : ()=>router.push("/user/book")}
           className="mt-12 px-10 py-4 bg-white text-black rounded-full font-semibold shadow-xl"
         >
           Book Now

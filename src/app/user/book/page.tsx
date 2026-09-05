@@ -101,7 +101,7 @@ function Page() {
         lon: f.geometry.coordinates[0],
       }));
       if (restrict) {
-        results = results.filter((r) => r.countrycode === restrict);
+        results = results.filter((r) => r.country == restrict);
       }
       setResults(results);
     } catch (error) {
@@ -139,7 +139,7 @@ function Page() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-100 flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-zinc-100 flex items-start justify-center px-4 py-10">
       <motion.div
         initial={{ opacity: 0, y: 32 }}
         animate={{ opacity: 1, y: 0 }}
@@ -469,7 +469,7 @@ function Page() {
                 disabled={!canContinue}
                 onClick={() => {
                   router.push(
-                    `/user/search?pickup=${encodeURIComponent(pickUp)}&drop=${encodeURIComponent(drop)}&vehicle=${vehicle}&mobile=${mobile}&pickuplat=${pickUpLat}&pickuplon=${pickUpLon}&droplat=${dropLat}&droplon=${dropLon}`,
+                    `/user/search?pickUp=${encodeURIComponent(pickUp)}&drop=${encodeURIComponent(drop)}&vehicle=${vehicle}&mobile=${mobile}&pickuplat=${pickUpLat}&pickuplon=${pickUpLon}&droplat=${dropLat}&droplon=${dropLon}`,
                   );
                 }}
                 className="w-full h-14 rounded-2xl bg-zinc-900 hover:bg-black disabled:opacity-35 text-white font-black text-sm tracking-wide flex items-center justify-center gap-2.5  transition-colors shadow-lg disabled:shadow-none"

@@ -87,7 +87,7 @@ function SearchMap({ pickUp, drop, onChange, onDistance }: props) {
         `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=1`,
       );
       if (!data.features.length) return null;
-      const [lat, lon] = data.features[0].geometry.coordinates;
+      const [lon, lat] = data.features[0].geometry.coordinates;
       return [lat, lon];
     } catch (error) {
       console.log(error);
@@ -145,8 +145,7 @@ function SearchMap({ pickUp, drop, onChange, onDistance }: props) {
     setReady(false);
     if (pickUp && drop) {
       (async () => {
-        const a = geoCoding(pickUp);
-        const b = geoCoding(drop);
+        const [a, b] = await Promise.all([geoCoding(pickUp), geoCoding(drop)]);
         if (!a || !b) {
           return;
         }
@@ -166,8 +165,8 @@ function SearchMap({ pickUp, drop, onChange, onDistance }: props) {
         zoomControl={false}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.carto.com/">"CARTO"</a> contributors'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {p1 && p2 && <FitBounds p1={p1} p2={p2} />}
         {p1 && (
@@ -177,7 +176,7 @@ function SearchMap({ pickUp, drop, onChange, onDistance }: props) {
             draggable
             eventHandlers={{
               dragend: (e) => {
-                const m = e.target.getLating();
+                const m = e.target.getLatLng();
                 dragPickUp(m.lat, m.lng);
               },
             }}
@@ -190,7 +189,7 @@ function SearchMap({ pickUp, drop, onChange, onDistance }: props) {
             draggable
             eventHandlers={{
               dragend: (e) => {
-                const m = e.target.getLating();
+                const m = e.target.getLatLng();
                 dragDrop(m.lat, m.lng);
               },
             }}
