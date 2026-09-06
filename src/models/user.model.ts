@@ -12,9 +12,20 @@ export interface IUser extends Document {
   mobileNumber?: string;
   partnerStatus: "pending" | "approved" | "rejected";
   rejectionReason?: string;
-  videoKycStatus?: "not_required" |"pending" | "in_progress" | "approved" | "rejected";
+  videoKycStatus?:
+    | "not_required"
+    | "pending"
+    | "in_progress"
+    | "approved"
+    | "rejected";
   videoKycRoomId?: string;
   videoKycRejectionReason?: string;
+  socketId: string | null;
+  location?: {
+    type: "Point";
+    coordinates: [number, number];
+  };
+  isOnline: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -76,9 +87,29 @@ const userSchema = new mongoose.Schema<IUser>(
     otpExpiresAt: {
       type: Date,
     },
+    socketId: {
+      type: String,
+      default: null,
+    },
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+      },
+      coordinates: {
+        type: [Number],
+      },
+    },
+    isOnline: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   { timestamps: true },
 );
+
+userSchema.index({ location: "2dsphere" });
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
