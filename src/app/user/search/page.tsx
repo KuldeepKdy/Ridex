@@ -3,8 +3,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 import { ArrowLeft, MapPin, Navigation } from "lucide-react";
 import { VehicleType } from "@/models/vehicle.model";
-import { useState } from "react";
-import  SearchMap from "@/components/SearchMap";
+import { useEffect, useState } from "react";
+import SearchMap from "@/components/SearchMap";
+import axios from "axios";
 
 function Page() {
   const router = useRouter();
@@ -19,6 +20,27 @@ function Page() {
   const dropLat = Number(params.get("droplat"));
   const dropLon = Number(params.get("droplon"));
   const vehicle = params.get("vehicle");
+
+  const getNearByVehicles = async (
+    latitude: number,
+    longitude: number,
+    vehicleType: string | null,
+  ) => {
+    try {
+      const { data } = await axios.post("/api/vehicles/near-by", {
+        latitude,
+        longitude,
+        vehicleType,
+      });
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getNearByVehicles(pickUpLat, pickUpLon, vehicle);
+  }, [pickUpLat, pickUpLon]);
 
   return (
     <div className="min-h-screen bg-zinc-100 text-zinc-900 overflow-x-hidden">
@@ -94,7 +116,7 @@ function Page() {
                 size={14}
                 className="text-zinc-400 flex-shrink-0 mt-1.5"
               />
-            </div> 
+            </div>
           </motion.div>
         </div>
       </motion.div>
