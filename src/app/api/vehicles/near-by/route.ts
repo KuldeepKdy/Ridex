@@ -31,10 +31,7 @@ export async function POST(req: NextRequest) {
 
     const partnerIds = partners.map((p) => p._id);
     if (partnerIds.length == 0) {
-      return NextResponse.json(
-        { message: "vehicles not found" },
-        { status: 200 },
-      );
+      return NextResponse.json([], { status: 200 });
     }
     const vehicles = await Vehicle.find({
       owner: { $in: partnerIds },
