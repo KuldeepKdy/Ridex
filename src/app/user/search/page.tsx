@@ -12,7 +12,7 @@ import {
   Search,
   RefreshCcw,
 } from "lucide-react";
-import { IVehicle, VehicleType } from "@/models/vehicle.model";
+import { VehicleType } from "@/models/vehicle.model";
 import { useEffect, useState } from "react";
 import SearchMap from "@/components/SearchMap";
 import axios from "axios";
@@ -26,13 +26,29 @@ const VEHICLE_META: any = {
   truck: { label: "Truck", Icon: Truck },
 };
 
+interface IVehicle {
+  owner: string;
+  type: VehicleType;
+  vehicleModel: string;
+  number: string;
+  imageUrl?: string;
+  baseFare?: number;
+  pricePerKM?: number;
+  waitingCharge?: number;
+  status: "pending" | "approved" | "rejected";
+  rejectionReason?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 function Page() {
   const router = useRouter();
   const params = useSearchParams();
 
   const [pickUp, setPickUp] = useState(params.get("pickUp") || "");
   const [drop, setDrop] = useState(params.get("drop") || "");
-  const [km, setKm] = useState<number | null>();
+  const [km, setKm] = useState<number>(0);
   const mobile = params.get("mobile") || "";
   const pickUpLat = Number(params.get("pickuplat"));
   const pickUpLon = Number(params.get("pickuplon"));
@@ -243,8 +259,22 @@ function Page() {
                 <VehicleCard
                   vehicle={v}
                   distance={km}
-                  
-                 />
+                  onBook={() => {
+                    const url = new URLSearchParams({
+                      pickUp,
+                      drop,
+                      vehicle: v.type,
+                      driverId: v.owner,
+                      fare: String(v.baseFare! + v.pricePerKM! * km),
+                      pickupLat: String(pickUpLat),
+                      pickupLon: String(pickUpLon),
+                      dropLat: String(dropLat),
+                      dropLon: String(dropLon),
+                      mobile: String(mobile),
+                    });
+                    router.push(`/user/checkout?${url.toString()}`);
+                  }}
+                />
               </motion.div>
             ))}
           </div>
