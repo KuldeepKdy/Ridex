@@ -7,8 +7,12 @@ import {
   MapPin,
   Navigation,
   IndianRupee,
+  Clock,
+  CreditCard,
+  ShieldCheck,
+  ArrowRight,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -19,6 +23,16 @@ const VEHICLE_META: any = {
   loading: { label: "Loading", Icon: Truck },
   truck: { label: "Truck", Icon: Truck },
 };
+
+type Status =
+  | "idle"
+  | "requested"
+  | "awaiting_payment"
+  | "rejected"
+  | "expired"
+  | "cancelled"
+  | "payment"
+  | "confirmed";
 
 function Page() {
   const router = useRouter();
@@ -34,6 +48,7 @@ function Page() {
   const vehicle = params.get("vehicle") || "";
   const fare = params.get("fare") || "";
   const { Icon, label } = VEHICLE_META[vehicle];
+  const [status, setStatus] = useState<Status>("idle");
   return (
     <div className="min-h-screen bg-zinc-100 px-4 py-12">
       <div className="relative max-w-6xl mx-auto z-10">
@@ -148,8 +163,6 @@ function Page() {
                   </span>
                 </motion.div>
               </div>
-
-
             </div>
           </motion.div>
 
@@ -162,9 +175,67 @@ function Page() {
               ease: [0.22, 1, 0.36, 1],
             }}
             className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.07)] flex flex-col"
-            >
-                <div className="h-1 bg-zinc-900" />
-            </motion.div>
+          >
+            <div className="h-1 bg-zinc-900" />
+            <div className="flex-1 p-8 sm:p-10 flex flex-col">
+              <AnimatePresence mode="wait">
+                {status == "idle" && (
+                  <motion.div
+                    key="idle"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{
+                      duration: 0.3,
+                    }}
+                    className="flex flex-col flex-1 justify-between"
+                  >
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em]">
+                        Ready to go?
+                      </p>
+                      <h3 className="text-2xl font-black text-zinc-900 mb-6">
+                        Confirm Your Ride
+                      </h3>
+                      <div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-5 space-y-3 ">
+                        {[
+                          {
+                            icon: <Clock size={14} />,
+                            text: "Driver will respond within 2 minutes",
+                          },
+                          {
+                            icon: <ShieldCheck size={14} />,
+                            text: "Verified & insured drivers only",
+                          },
+                          {
+                            icon: <CreditCard size={14} />,
+                            text: "Pay after driver accepts",
+                          },
+                        ].map((item, i) => (
+                          <div key={i} className="flex items-center gap-3">
+                            <div className="w-7 h-7 rounded-xl bg-zinc-200 flex items-center justify-center text-zinc-600 flex-shrink-0">
+                              {item.icon}
+                            </div>
+                            <span className="text-zinc-500 text-xs font-medium">
+                              {item.text}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      whileHover={{ scale: 1.02 }}
+                      className="w-full h-14 mt-8 bg-zinc-900 hover:bg-black disabled:opacity-40 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 transition-colors shadow-md"
+                    >
+                      <span>Request Ride</span>
+                      <ArrowRight size={15} />
+                    </motion.button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>
