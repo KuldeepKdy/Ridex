@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import {
   Bike,
   Car,
@@ -46,9 +47,36 @@ function Page() {
   const dropLat = Number(params.get("droplat"));
   const dropLon = Number(params.get("droplon"));
   const vehicle = params.get("vehicle") || "";
+  const driverId = params.get("driverId") || "";
+  const vehicleId = params.get("vehicleId") || "";
   const fare = params.get("fare") || "";
   const { Icon, label } = VEHICLE_META[vehicle];
   const [status, setStatus] = useState<Status>("idle");
+
+  const handleRequestBooking = async () => {
+    try {
+      const { data } = await axios.post("/api/booking/create", {
+        driverId,
+        vehicleId,
+        pickUpAddress: pickUp,
+        dropAddress: drop,
+        pickUpLocation: {
+          type: "Point",
+          coordinates: [pickUpLon, pickUpLat],
+        },
+        dropLocation: {
+          type: "Point",
+          coordinates: [dropLon, dropLat],
+        },
+        fare,
+        mobileNumber: mobile,
+      });
+      setStatus("requested");
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="min-h-screen bg-zinc-100 px-4 py-12">
       <div className="relative max-w-6xl mx-auto z-10">
@@ -226,6 +254,7 @@ function Page() {
                     <motion.button
                       whileTap={{ scale: 0.97 }}
                       whileHover={{ scale: 1.02 }}
+                      onClick={handleRequestBooking}
                       className="w-full h-14 mt-8 bg-zinc-900 hover:bg-black disabled:opacity-40 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 transition-colors shadow-md"
                     >
                       <span>Request Ride</span>
