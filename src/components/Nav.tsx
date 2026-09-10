@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Bike, Car, ChevronRight, LogOut, Menu, Truck, X } from "lucide-react";
 import { setUserData } from "@/redux/userSlice";
 import { signOut } from "next-auth/react";
+import axios from "axios";
 
 const Nav_Items = ["Home", "About", "Contact", "Booking"];
 
@@ -19,13 +20,32 @@ function Nav() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { userData } = useSelector((state: RootState) => state.user);
+  const [pendingCount, setPendingCount] = useState(0);
+  const router = useRouter();
   const dispatch = useDispatch();
   const handleLogout = async () => {
     await signOut({ redirect: false });
     dispatch(setUserData(null));
     setProfileOpen(false);
   };
-  const router = useRouter();
+  const fetchCount = async () => {
+    try {
+      const { data } = await axios.get(
+        "/api/partner/bookings/pending-requests-count",
+      );
+      console.log(data);
+      setPendingCount(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (userData?.role == "partner") {
+      fetchCount();
+    }
+  }, [userData?.role]);
+
   return (
     <>
       <motion.div
@@ -37,24 +57,56 @@ function Nav() {
           <Image src="/logo.png" alt="logo" width={44} height={44} />
 
           <div className="hidden md:flex items-center gap-10">
-            {Nav_Items.map((item, index) => {
-              let href;
-              if (item === "Home") {
-                href = `/`;
-              } else {
-                href = `/${item.toLowerCase()}`;
-              }
-              const active = href === pathName;
-              return (
+            {userData?.role == "partner" ? (
+              <>
                 <Link
-                  key={index}
-                  href={href}
-                  className={` text-sm  font-medium transition ${active ? "text-white" : "text-gray-400 hover:text-white"} `}
+                  className="relative text-sm font-medium text-gray-300 hover:text-white transition"
+                  href={"/"}
                 >
-                  {item}
+                  Home
                 </Link>
-              );
-            })}
+                <Link
+                  className="relative text-sm font-medium text-gray-300 hover:text-white transition"
+                  href={"/partner/pending-requests"}
+                >
+                  Pending Requests
+                  <span className="absolute -top-2 -right-5 w-6 h-6 bg-white text-black text-sm rounded-full flex items-center justify-center font-bold">
+                    {pendingCount ?? 0}
+                  </span>
+                </Link>
+                <Link
+                  className="relative text-sm font-medium text-gray-300 hover:text-white transition"
+                  href={"/partner/bookings"}
+                >
+                  Bookings
+                </Link>
+                <Link
+                  className="relative text-sm font-medium text-gray-300 hover:text-white transition"
+                  href={"/partner/active-ride"}
+                >
+                  Active Ride
+                </Link>
+              </>
+            ) : (
+              Nav_Items.map((item, index) => {
+                let href;
+                if (item === "Home") {
+                  href = `/`;
+                } else {
+                  href = `/${item.toLowerCase()}`;
+                }
+                const active = href === pathName;
+                return (
+                  <Link
+                    key={index}
+                    href={href}
+                    className={` text-sm  font-medium transition ${active ? "text-white" : "text-gray-400 hover:text-white"} `}
+                  >
+                    {item}
+                  </Link>
+                );
+              })
+            )}
           </div>
 
           <div className="flex items-center gap-3 relative">
