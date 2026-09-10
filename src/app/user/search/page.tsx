@@ -73,6 +73,7 @@ function Page() {
         vehicleType,
       });
       setVehicles(data);
+      console.log( "vehicles near me",data);
       setLoading(false);
     } catch (error) {
       console.log(error);

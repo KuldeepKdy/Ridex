@@ -3,6 +3,7 @@ import axios from "axios";
 import {
   CheckCircle2,
   Clock,
+  LogOut,
   Truck,
   User,
   Users,
@@ -15,6 +16,11 @@ import Kpi from "./Kpi";
 import TabButton from "./TabButton";
 import { AnimatePresence, motion } from "motion/react";
 import ContentList from "./ContentList";
+import { signOut } from "next-auth/react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { setUserData } from "@/redux/userSlice";
+import { useRouter } from "next/navigation";
 
 type Stats = {
   totalPartners: number;
@@ -31,6 +37,15 @@ function AdminDashboard() {
   const [partnerReviews, setPartnerReviews] = useState<any>([]);
   const [pendingKyc, setPendingKyc] = useState<any>([]);
   const [vehicleReviews, setVehicleReviews] = useState<any>([]);
+  const router = useRouter();
+
+  const { userData } = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch();
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    dispatch(setUserData(null));
+    router.push("/");
+  };
   const handleGetData = async () => {
     try {
       const { data } = await axios.get("/api/admin/dashboard");
@@ -61,9 +76,17 @@ function AdminDashboard() {
           <div className="flex items-center gap-3">
             <Image src="/logo.png" alt="logo" width={44} height={44} />
           </div>
-          <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-black text-white">
-            <User size={16} />
-            Admin Dashboard
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-black text-white">
+              <User size={16} />
+              Admin Dashboard
+            </div>
+            <button
+              onClick={handleLogout}
+              className="w-full text-center flex justify-center items-center h-11 font-semibold rounded-xl bg-black text-white hover:bg-gray-900 transition"
+            >
+              <LogOut size={16} />
+            </button>
           </div>
         </div>
       </div>

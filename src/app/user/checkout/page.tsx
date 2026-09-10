@@ -42,10 +42,10 @@ function Page() {
   const [pickUp, setPickUp] = useState(params.get("pickUp") || "");
   const [drop, setDrop] = useState(params.get("drop") || "");
   const mobile = params.get("mobile") || "";
-  const pickUpLat = Number(params.get("pickuplat"));
-  const pickUpLon = Number(params.get("pickuplon"));
-  const dropLat = Number(params.get("droplat"));
-  const dropLon = Number(params.get("droplon"));
+  const pickUpLat = Number(params.get("pickupLat"));
+  const pickUpLon = Number(params.get("pickupLon"));
+  const dropLat = Number(params.get("dropLat"));
+  const dropLon = Number(params.get("dropLon"));
   const vehicle = params.get("vehicle") || "";
   const driverId = params.get("driverId") || "";
   const vehicleId = params.get("vehicleId") || "";

@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       location: {
         $near: {
           $geometry: {
-            type: "point",
+            type: "Point",
             coordinates: [longitude, latitude],
           },
           $maxDistance: 10000,
