@@ -1,9 +1,47 @@
 "use client";
-import { IBooking } from "@/models/booking.model";
+import { BookingStatus, paymentStatus } from "@/models/booking.model";
 import axios from "axios";
 import { Clock, Loader2, MapPin, Navigation, IndianRupee } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+
+interface IBooking {
+  _id: string;
+  user: string;
+  driver: string;
+  vehicle: string;
+
+  pickUpAddress: string;
+  dropAddress: string;
+
+  pickUpLocation: {
+    type: "Point";
+    coordinates: [number, number];
+  };
+  dropLocation: {
+    type: "Point";
+    coordinates: [number, number];
+  };
+
+  fare: number;
+
+  userMobileNumber: string;
+  driverMobileNumber: string;
+
+  bookingStatus: BookingStatus;
+  paymentStatus: paymentStatus;
+  paymentDeadline: Date;
+
+  adminCommission: number;
+  partnerAmount: number;
+
+  pickUpOtp: string;
+  pickUpOtpExpires: Date;
+  dropOtp: string;
+  dropOtpExpires: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 function Page() {
   const [bookings, setBookings] = useState<IBooking[]>([]);
@@ -17,6 +55,24 @@ function Page() {
     } catch (error) {
       console.log(error);
       setLoading(false);
+    }
+  };
+
+  const handleAccept = async (id: string) => {
+    try {
+      const { data } = await axios.get(`/api/partner/bookings/${id}/accept`);
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    try {
+      const { data } = await axios.get(`/api/partner/bookings/${id}/reject`);
+      console.log(data);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -101,6 +157,21 @@ function Page() {
                         <IndianRupee size={20} />
                         {b.fare}
                       </div>
+                    </div>
+
+                    <div className="flex gap-4 w-full lg:w-auto">
+                      <button
+                        onClick={() => handleReject(b._id)}
+                        className="flex-1 lg:flex-none px-6 py-3 rounded-xl border border-gray-300 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-100 transition-all duration-200 active:scale-[0.98] disabled:opacity-50"
+                      >
+                        Reject
+                      </button>
+                      <button
+                        onClick={() => handleAccept(b._id)}
+                        className="flex-1 lg:flex-none px-6 py-3 rounded-xl border border-gray-300 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-100 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center"
+                      >
+                        Accept Ride
+                      </button>
                     </div>
                   </div>
                 </div>
