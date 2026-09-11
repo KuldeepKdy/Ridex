@@ -15,6 +15,8 @@ import {
   Loader2,
   XCircle,
   CheckCircle,
+  Wallet,
+  Banknote,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -57,6 +59,7 @@ function Page() {
   const [status, setStatus] = useState<Status>("idle");
   const [loading, setLoading] = useState(false);
   const [booking, setBooking] = useState<any>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "online">("cash");
 
   const handleRequestBooking = async () => {
     setLoading(true);
@@ -109,6 +112,14 @@ function Page() {
   useEffect(() => {
     fetchActiveBooking();
   }, []);
+
+  useEffect(() => {
+    if (status !== "awaiting_payment") return;
+    const t = setTimeout(() => {
+      setStatus("payment");
+    }, 2000);
+    return () => clearTimeout(t);
+  }, [status]);
 
   return (
     <div className="min-h-screen bg-zinc-100 px-4 py-12">
@@ -365,8 +376,122 @@ function Page() {
                       <h3 className="text-xl font-black text-zinc-900 mb-1">
                         Driver Accepted
                       </h3>
-                      <p className="text-zinc-400 text-sm font-medium">Preparing payment options…</p>
+                      <p className="text-zinc-400 text-sm font-medium">
+                        Preparing payment options…
+                      </p>
                     </div>
+                    <div className="w-48 bg-zinc-100 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: "100%" }}
+                        transition={{ duration: 2 }}
+                        className="h-full bg-zinc-900 rounded-full"
+                      />
+                    </div>
+                  </motion.div>
+                )}
+                {status == "payment" && (
+                  <motion.div
+                    key="payment"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="flex flex-col flex-1 gap-6"
+                  >
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400 mb-1">
+                        Almost There
+                      </p>
+                      <h3 className="text-2xl font-black text-zinc-900">
+                        Select Payment Method
+                      </h3>
+                    </div>
+                    <div className="space-y-4">
+                      {[
+                        {
+                          id: "cash",
+                          Icon: Banknote,
+                          title: "Cash",
+                          sub: "Pay driver after ride",
+                        },
+                        {
+                          id: "online",
+                          Icon: Wallet,
+                          title: "Online Payment",
+                          sub: "UPI · Card · Netbanking",
+                        },
+                      ].map((p, i) => {
+                        const active = paymentMethod == p.id;
+                        return (
+                          <motion.div
+                            key={p.id}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={() => setPaymentMethod(p.id as any)}
+                            className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all duration-200 ${active ? "bg-zinc-900 border-zinc-900" : "bg-zinc-50 border-zinc-200 hover:border-zinc-400"}`}
+                          >
+                            <div
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
+                                active ? "bg-white/10" : "bg-zinc-200"
+                              }`}
+                            >
+                              <p.Icon
+                                size={18}
+                                className={
+                                  active ? "text-white" : "text-zinc-600"
+                                }
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p
+                                className={`text-sm font-bold ${active ? "text-white" : "text-zinc-900"}`}
+                              >
+                                {p.title}
+                              </p>
+                              <p
+                                className={`text-xs font-medium ${active ? "text-zinc-400" : "text-zinc-400"}`}
+                              >
+                                {p.sub}
+                              </p>
+                            </div>
+
+                            <AnimatePresence>
+                              {active && (
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  exit={{ scale: 0 }}
+                                >
+                                  <CheckCircle
+                                    size={16}
+                                    className="text-white flex-shrink-0"
+                                  />
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      whileHover={paymentMethod ? { scale: 1.02 } : {}}
+                      disabled={!paymentMethod}
+                      className="w-full h-14 bg-zinc-900 hover:bg-black disabled:opacity-30 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 transition-colors shadow-md mt-auto"
+                    >
+                      {paymentMethod == "cash" ? (
+                        <>
+                          <Banknote size={16} />
+                          <span>Confirm Cash Ride</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Proceed to Payment</span>
+                          <ArrowRight size={16} />
+                        </>
+                      )}
+                    </motion.button>
                   </motion.div>
                 )}
               </AnimatePresence>
